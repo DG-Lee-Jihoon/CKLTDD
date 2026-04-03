@@ -4,21 +4,17 @@ import kotlinx.coroutines.flow.Flow
 
 class CardRepository(private val dao: CardDao) {
 
-    // ── Deck ──────────────────────────────────────────
-    val allDecks: Flow<List<Deck>> = dao.getAllDecks()
+    // ── Deck ──────────────────────────────────────────────
+    fun getAllDecks(): Flow<List<Deck>> = dao.getAllDecks()
+
+    suspend fun getDeckById(id: Int): Deck? = dao.getDeckById(id)
 
     suspend fun insertDeck(deck: Deck): Long = dao.insertDeck(deck)
 
     suspend fun deleteDeck(deck: Deck) = dao.deleteDeck(deck)
 
-    suspend fun getDeckById(id: Long): Deck? = dao.getDeckById(id)
-
-    // ── Card ──────────────────────────────────────────
-    fun getCardsByDeck(deckId: Long): Flow<List<Card>> = dao.getCardsByDeck(deckId)
-
-    fun getCardCount(deckId: Long): Flow<Int> = dao.getCardCount(deckId)
-
-    fun getDueCardCount(deckId: Long): Flow<Int> = dao.getDueCardCount(deckId)
+    // ── Card ──────────────────────────────────────────────
+    fun getCardsByDeck(deckId: Int): Flow<List<Card>> = dao.getCardsByDeck(deckId)
 
     suspend fun insertCard(card: Card) = dao.insertCard(card)
 
@@ -26,5 +22,12 @@ class CardRepository(private val dao: CardDao) {
 
     suspend fun deleteCard(card: Card) = dao.deleteCard(card)
 
-    suspend fun getDueCards(deckId: Long): List<Card> = dao.getDueCards(deckId)
+    // Lấy thẻ đến hạn hôm nay
+    suspend fun getDueCards(deckId: Int): List<Card> = dao.getDueCards(deckId)
+
+    fun getDueCardCount(deckId: Int): Flow<Int> = dao.getDueCardCount(deckId)
+
+    fun getTotalCardCount(deckId: Int): Flow<Int> = dao.getTotalCardCount(deckId)
+
+    suspend fun getCardsByDeckOnce(deckId: Int): List<Card> = dao.getCardsByDeckOnce(deckId)
 }
