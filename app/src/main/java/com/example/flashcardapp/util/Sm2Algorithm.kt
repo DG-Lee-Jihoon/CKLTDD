@@ -1,51 +1,46 @@
 package com.example.flashcardapp.util
 
 import com.example.flashcardapp.data.Card
-import java.util.concurrent.TimeUnit
+import com.example.flashcardapp.ui.theme.ReviewQuality
 
-/**
- * SuperMemo SM-2 Algorithm
- *
- * quality:
- *   0 = Quên hoàn toàn
- *   1 = Nhớ sai, nhưng nhìn đáp án thấy quen
- *   2 = Nhớ sai, nhưng đáp án dễ nhớ lại
- *   3 = Nhớ đúng, nhưng khó
- *   4 = Nhớ đúng, sau chút do dự
- *   5 = Nhớ đúng hoàn hảo
- */
-fun applySmTwo(card: Card, quality: Int): Card {
-    require(quality in 0..5) { "Quality phải từ 0 đến 5" }
+object Sm2Algorithm {
 
-    val newRepetition: Int
-    val newInterval: Int
-    val newEaseFactor: Float
+    /**
+     * Tính toán lịch ôn tập tiếp theo theo thuật toán SM-2.
+     *
+     * @param card   Thẻ hiện tại
+     * @param quality Mức độ nhớ: Again(0), Hard(1), Good(3), Easy(5)
+     * @return Card mới với interval, repetition, easeFactor, dueDate đã cập nhật
+     */
+    fun calculate(card: Card, quality: ReviewQuality): Card {
+        val q = quality.value
 
-    if (quality < 3) {
-        // Trả lời sai → reset về đầu
-        newRepetition = 0
-        newInterval = 1
-        newEaseFactor = card.easeFactor
-    } else {
-        // Trả lời đúng → tính interval mới
-        newRepetition = card.repetition + 1
-        newInterval = when (card.repetition) {
-            0    -> 1
-            1    -> 6
-            else -> (card.interval * card.easeFactor).toInt()
+        val newEaseFactor = (card.easeFactor + 0.1 - (5 - q) * (0.08 + (5 - q) * 0.02))
+            .coerceAtLeast(1.3) // EF tối thiểu là 1.3
+
+        return if (q < 3) {
+            // Trả lời sai → reset, ôn lại ngay ngày mai
+            card.copy(
+                repetition = 0,
+                interval = 1,
+                easeFactor = newEaseFactor,
+                dueDate = System.currentTimeMillis() + daysToMillis(1)
+            )
+        } else {
+            // Trả lời đúng
+            val newInterval = when (card.repetition) {
+                0 -> 1
+                1 -> 6
+                else -> (card.interval * newEaseFactor).toInt()
+            }
+            card.copy(
+                repetition = card.repetition + 1,
+                interval = newInterval,
+                easeFactor = newEaseFactor,
+                dueDate = System.currentTimeMillis() + daysToMillis(newInterval)
+            )
         }
-        // EF mới: EF' = EF + (0.1 - (5-q) * (0.08 + (5-q) * 0.02))
-        val delta = 0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02)
-        newEaseFactor = maxOf(1.3f, (card.easeFactor + delta).toFloat())
     }
 
-    val nextReview = System.currentTimeMillis() +
-            TimeUnit.DAYS.toMillis(newInterval.toLong())
-
-    return card.copy(
-        interval      = newInterval,
-        repetition    = newRepetition,
-        easeFactor    = newEaseFactor,
-        nextReviewDate = nextReview
-    )
+    private fun daysToMillis(days: Int): Long = days * 24L * 60 * 60 * 1000
 }
