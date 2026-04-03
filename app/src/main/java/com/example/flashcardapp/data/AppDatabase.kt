@@ -5,11 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(
-    entities = [Card::class, Deck::class],
-    version = 1,
-    exportSchema = false
-)
+@Database(entities = [Card::class, Deck::class], version = 1, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun cardDao(): CardDao
@@ -20,14 +16,13 @@ abstract class AppDatabase : RoomDatabase() {
 
         fun getInstance(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
-                Room.databaseBuilder(
+                val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
                     "flashcard_database"
-                )
-                    .fallbackToDestructiveMigration()
-                    .build()
-                    .also { INSTANCE = it }
+                ).build()
+                INSTANCE = instance
+                instance
             }
         }
     }
