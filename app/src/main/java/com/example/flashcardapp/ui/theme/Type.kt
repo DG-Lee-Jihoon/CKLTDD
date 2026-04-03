@@ -1,34 +1,26 @@
 package com.example.flashcardapp.ui.theme
 
-import androidx.compose.material3.Typography
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
+// Navigation destinations
+sealed class Screen(val route: String) {
+    object Home : Screen("home")
+    object Deck : Screen("deck/{deckId}") {
+        fun createRoute(deckId: Int) = "deck/$deckId"
+    }
+    object AddCard : Screen("addCard/{deckId}") {
+        fun createRoute(deckId: Int) = "addCard/$deckId"
+    }
+    object Study : Screen("study/{deckId}") {
+        fun createRoute(deckId: Int) = "study/$deckId"
+    }
+    object Stats : Screen("stats/{deckId}") {
+        fun createRoute(deckId: Int) = "stats/$deckId"
+    }
+}
 
-// Set of Material typography styles to start with
-val Typography = Typography(
-    bodyLarge = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
-        letterSpacing = 0.5.sp
-    )
-    /* Other default text styles to override
-    titleLarge = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 22.sp,
-        lineHeight = 28.sp,
-        letterSpacing = 0.sp
-    ),
-    labelSmall = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Medium,
-        fontSize = 11.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 0.5.sp
-    )
-    */
-)
+// Mức độ trả lời khi ôn thẻ (dùng cho SM-2)
+enum class ReviewQuality(val value: Int, val label: String) {
+    Again(0, "Again"),   // Không nhớ, ôn lại ngay
+    Hard(1, "Hard"),     // Nhớ nhưng khó
+    Good(3, "Good"),     // Nhớ bình thường
+    Easy(5, "Easy")      // Nhớ rất dễ
+}
