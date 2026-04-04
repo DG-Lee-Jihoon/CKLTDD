@@ -14,19 +14,15 @@ class CardViewModel(application: Application) : AndroidViewModel(application) {
     private val db = AppDatabase.getInstance(application)
     private val repository = CardRepository(db.cardDao())
 
-    // Danh sách tất cả bộ thẻ
     val allDecks: StateFlow<List<Deck>> = repository.getAllDecks()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    // Hàng đợi thẻ cần học
     private val _studyQueue = MutableStateFlow<List<Card>>(emptyList())
     val studyQueue: StateFlow<List<Card>> = _studyQueue.asStateFlow()
 
     // ── Deck ──────────────────────────────────────────────
     fun addDeck(name: String, description: String = "") {
-        viewModelScope.launch {
-            repository.insertDeck(Deck(name = name, description = description))
-        }
+        viewModelScope.launch { repository.insertDeck(Deck(name = name, description = description)) }
     }
 
     fun deleteDeck(deck: Deck) {
@@ -38,21 +34,20 @@ class CardViewModel(application: Application) : AndroidViewModel(application) {
 
     fun getDueCount(deckId: Int): Flow<Int> = repository.getDueCardCount(deckId)
 
+    fun getTotalCount(deckId: Int): Flow<Int> = repository.getTotalCardCount(deckId)
+
     fun addCard(deckId: Int, front: String, back: String) {
-        viewModelScope.launch {
-            repository.insertCard(Card(deckId = deckId, front = front, back = back))
-        }
+        viewModelScope.launch { repository.insertCard(Card(deckId = deckId, front = front, back = back)) }
     }
 
     fun deleteCard(card: Card) {
         viewModelScope.launch { repository.deleteCard(card) }
     }
 
-    // ── Study ─────────────────────────────────────────────
+    // ── Study (SM-2) ──────────────────────────────────────
     fun loadStudyQueue(deckId: Int) {
         viewModelScope.launch {
-            val dueCards = repository.getDueCards(deckId)
-            _studyQueue.value = dueCards
+            _studyQueue.value = repository.getDueCards(deckId)
         }
     }
 
@@ -60,7 +55,6 @@ class CardViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             val updated = Sm2Algorithm.calculate(card, quality)
             repository.updateCard(updated)
-            // Xóa thẻ vừa trả lời khỏi hàng đợi
             _studyQueue.value = _studyQueue.value.drop(1)
         }
     }
