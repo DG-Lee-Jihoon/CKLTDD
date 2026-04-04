@@ -4,7 +4,6 @@ import kotlinx.coroutines.flow.Flow
 
 class CardRepository(private val dao: CardDao) {
 
-    // ── Deck ──────────────────────────────────────────────
     fun getAllDecks(): Flow<List<Deck>> = dao.getAllDecks()
 
     suspend fun getDeckById(id: Int): Deck? = dao.getDeckById(id)
@@ -13,7 +12,6 @@ class CardRepository(private val dao: CardDao) {
 
     suspend fun deleteDeck(deck: Deck) = dao.deleteDeck(deck)
 
-    // ── Card ──────────────────────────────────────────────
     fun getCardsByDeck(deckId: Int): Flow<List<Card>> = dao.getCardsByDeck(deckId)
 
     suspend fun insertCard(card: Card) = dao.insertCard(card)
@@ -22,7 +20,6 @@ class CardRepository(private val dao: CardDao) {
 
     suspend fun deleteCard(card: Card) = dao.deleteCard(card)
 
-    // Lấy thẻ đến hạn hôm nay
     suspend fun getDueCards(deckId: Int): List<Card> = dao.getDueCards(deckId)
 
     fun getDueCardCount(deckId: Int): Flow<Int> = dao.getDueCardCount(deckId)
