@@ -1,133 +1,168 @@
 package com.example.flashcardapp.ui.theme
 
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.flashcardapp.data.Card
 import com.example.flashcardapp.viewmodel.CardViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StatsScreen(
-    deckId: Int,
-    viewModel: CardViewModel,
-    onBack: () -> Unit
-) {
-    val cards by viewModel.getCardsByDeck(deckId).collectAsStateWithLifecycle(initialValue = emptyList())
+fun StatsScreen(deckId: Int, viewModel: CardViewModel, onBack: () -> Unit) {
+    val cards by viewModel.getCardsByDeck(deckId).collectAsStateWithLifecycle(emptyList())
     val now = System.currentTimeMillis()
 
-    val totalCards = cards.size
-    val dueCards = cards.count { it.dueDate <= now }
-    val learnedCards = cards.count { it.repetition > 0 }
-    val avgEase = if (cards.isEmpty()) 2.5 else cards.map { it.easeFactor }.average()
+    val total = cards.size
+    val due = cards.count { it.dueDate <= now }
+    val learned = cards.count { it.repetition > 0 }
+    val avgEF = if (cards.isEmpty()) 2.5 else cards.map { it.easeFactor }.average()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Thống kê") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) { Text("←") }
-                }
-            )
-        }
-    ) { padding ->
+    Box(
+        modifier = Modifier.fillMaxSize()
+            .background(Brush.verticalGradient(listOf(BgDeep, Color(0xFF12122A))))
+    ) {
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            // Tổng quan
             item {
-                Text("Tổng quan", style = MaterialTheme.typography.titleMedium)
-                Spacer(Modifier.height(8.dp))
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    modifier = Modifier.fillMaxWidth().padding(top = 28.dp, bottom = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    StatCard("Tổng thẻ", "$totalCards", Modifier.weight(1f))
-                    StatCard("Đến hạn", "$dueCards", Modifier.weight(1f), highlight = dueCards > 0)
-                    StatCard("Đã học", "$learnedCards", Modifier.weight(1f))
+                    IconButton(onClick = onBack,
+                        modifier = Modifier.size(40.dp).clip(CircleShape).background(BgCard)
+                    ) { Icon(Icons.Default.ArrowBack, null, tint = TextPrimary) }
+                    Spacer(Modifier.width(12.dp))
+                    Text("Thống kê", color = TextPrimary, fontWeight = FontWeight.Black, fontSize = 24.sp)
+                }
+            }
+
+            // Summary cards
+            item {
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    StatBox("Tổng thẻ", "$total", AccentPurple, Modifier.weight(1f))
+                    StatBox("Đến hạn", "$due", if (due > 0) ColorAgain else ColorGood, Modifier.weight(1f))
+                    StatBox("Đã học", "$learned", ColorEasy, Modifier.weight(1f))
                 }
             }
 
             item {
-                StatCard("Độ dễ trung bình", "%.2f".format(avgEase), Modifier.fillMaxWidth())
+                Box(
+                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp))
+                        .background(BgCard).padding(16.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Column(Modifier.weight(1f)) {
+                            Text("Độ dễ trung bình (EF)", color = TextSecondary, fontSize = 13.sp)
+                            Text("%.2f".format(avgEF), color = TextPrimary, fontSize = 28.sp, fontWeight = FontWeight.Black)
+                        }
+                        // EF indicator
+                        val efColor = when {
+                            avgEF >= 2.5 -> ColorGood
+                            avgEF >= 2.0 -> ColorHard
+                            else -> ColorAgain
+                        }
+                        Box(
+                            modifier = Modifier.size(50.dp).clip(CircleShape)
+                                .background(efColor.copy(alpha = 0.15f))
+                                .border(2.dp, efColor, CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                if (avgEF >= 2.5) "😊" else if (avgEF >= 2.0) "😓" else "😵",
+                                fontSize = 22.sp
+                            )
+                        }
+                    }
+                }
             }
 
-            // Danh sách thẻ kèm trạng thái
             item {
-                Spacer(Modifier.height(4.dp))
-                Text("Chi tiết từng thẻ", style = MaterialTheme.typography.titleMedium)
+                Text("Chi tiết từng thẻ", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }
 
             items(cards) { card ->
-                CardStatRow(card = card, now = now)
+                CardStatItem(card = card, now = now)
             }
+
+            item { Spacer(Modifier.height(20.dp)) }
         }
     }
 }
 
 @Composable
-private fun StatCard(
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier,
-    highlight: Boolean = false
-) {
-    Card(
-        modifier = modifier,
-        colors = CardDefaults.cardColors(
-            containerColor = if (highlight) MaterialTheme.colorScheme.errorContainer
-            else MaterialTheme.colorScheme.surfaceVariant
-        )
+private fun StatBox(label: String, value: String, color: Color, modifier: Modifier) {
+    Box(
+        modifier = modifier.clip(RoundedCornerShape(16.dp))
+            .background(color.copy(alpha = 0.1f))
+            .border(1.dp, color.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
+            .padding(14.dp),
+        contentAlignment = Alignment.Center
     ) {
-        Column(
-            modifier = Modifier.padding(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(value, style = MaterialTheme.typography.headlineSmall)
-            Text(label, style = MaterialTheme.typography.bodySmall)
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(value, color = color, fontSize = 26.sp, fontWeight = FontWeight.Black)
+            Text(label, color = TextSecondary, fontSize = 11.sp)
         }
     }
 }
 
 @Composable
-private fun CardStatRow(card: Card, now: Long) {
-    val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-    val dueDateStr = sdf.format(Date(card.dueDate))
+private fun CardStatItem(card: Card, now: Long) {
     val isDue = card.dueDate <= now
+    val sdf = SimpleDateFormat("dd/MM/yy", Locale.getDefault())
 
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(card.front, style = MaterialTheme.typography.bodyMedium, maxLines = 1)
-                Text(
-                    "Lần ôn: ${card.repetition} | Khoảng: ${card.interval}d | EF: ${"%.1f".format(card.easeFactor)}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+    Box(
+        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(BgCard).padding(14.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text(card.front, color = TextPrimary, fontSize = 14.sp, fontWeight = FontWeight.Medium, maxLines = 1)
+                Spacer(Modifier.height(4.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    MiniTag("×${card.repetition}", AccentPurple)
+                    MiniTag("${card.interval}d", ColorEasy)
+                    MiniTag("EF ${"%.1f".format(card.easeFactor)}", ColorGood)
+                }
             }
-            Column(horizontalAlignment = Alignment.End) {
+            Spacer(Modifier.width(8.dp))
+            Box(
+                modifier = Modifier.clip(RoundedCornerShape(8.dp))
+                    .background(if (isDue) ColorAgain.copy(0.15f) else ColorGood.copy(0.1f))
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            ) {
                 Text(
-                    if (isDue) "Đến hạn" else dueDateStr,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (isDue) MaterialTheme.colorScheme.error
-                    else MaterialTheme.colorScheme.primary
+                    if (isDue) "Hôm nay" else sdf.format(Date(card.dueDate)),
+                    color = if (isDue) ColorAgain else ColorGood,
+                    fontSize = 11.sp, fontWeight = FontWeight.SemiBold
                 )
             }
         }
     }
+}
+
+@Composable
+private fun MiniTag(text: String, color: Color) {
+    Box(
+        modifier = Modifier.clip(RoundedCornerShape(6.dp))
+            .background(color.copy(alpha = 0.12f))
+            .padding(horizontal = 6.dp, vertical = 2.dp)
+    ) { Text(text, color = color, fontSize = 10.sp, fontWeight = FontWeight.SemiBold) }
 }
