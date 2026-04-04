@@ -9,6 +9,11 @@ import com.example.flashcardapp.util.StudyReminderWorker
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Trong MainActivity.kt -> onCreate
+        com.google.firebase.auth.FirebaseAuth.getInstance().signInAnonymously()
+            .addOnSuccessListener {
+                android.util.Log.d("FIREBASE", "Kết nối thành công!")
+            }
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
 

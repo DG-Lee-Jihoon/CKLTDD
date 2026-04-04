@@ -9,6 +9,8 @@ import com.example.flashcardapp.util.Sm2Algorithm
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
+// Trong CardViewModel.kt
+
 class CardViewModel(application: Application) : AndroidViewModel(application) {
 
     private val db = AppDatabase.getInstance(application)
