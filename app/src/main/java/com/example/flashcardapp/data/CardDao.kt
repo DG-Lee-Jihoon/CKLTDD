@@ -32,10 +32,6 @@ interface CardDao {
     @Query("SELECT * FROM cards WHERE deckId = :deckId")
     fun getCardsByDeck(deckId: Int): Flow<List<Card>>
 
-    @Query("SELECT * FROM cards WHERE deckId = :deckId")
-    suspend fun getCardsByDeckOnce(deckId: Int): List<Card>
-
-    // Lấy các thẻ đến hạn ôn tập (dueDate <= thời điểm hiện tại)
     @Query("SELECT * FROM cards WHERE deckId = :deckId AND dueDate <= :now ORDER BY dueDate ASC")
     suspend fun getDueCards(deckId: Int, now: Long = System.currentTimeMillis()): List<Card>
 
@@ -44,4 +40,8 @@ interface CardDao {
 
     @Query("SELECT COUNT(*) FROM cards WHERE deckId = :deckId")
     fun getTotalCardCount(deckId: Int): Flow<Int>
+
+    // Dùng cho WorkManager — lấy tất cả thẻ đến hạn không phân biệt deck
+    @Query("SELECT * FROM cards WHERE dueDate <= :now")
+    suspend fun getAllDueCards(now: Long): List<Card>
 }
