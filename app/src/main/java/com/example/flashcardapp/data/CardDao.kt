@@ -6,7 +6,6 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface CardDao {
 
-    // ── Deck ──────────────────────────────────────────────
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertDeck(deck: Deck): Long
 
@@ -19,7 +18,6 @@ interface CardDao {
     @Query("SELECT * FROM decks WHERE id = :deckId")
     suspend fun getDeckById(deckId: Int): Deck?
 
-    // ── Card ──────────────────────────────────────────────
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCard(card: Card)
 
@@ -41,7 +39,9 @@ interface CardDao {
     @Query("SELECT COUNT(*) FROM cards WHERE deckId = :deckId")
     fun getTotalCardCount(deckId: Int): Flow<Int>
 
-    // Dùng cho WorkManager — lấy tất cả thẻ đến hạn không phân biệt deck
     @Query("SELECT * FROM cards WHERE dueDate <= :now")
     suspend fun getAllDueCards(now: Long): List<Card>
+
+    @Query("SELECT * FROM cards WHERE deckId = :deckId")
+    suspend fun getCardsByDeckOnce(deckId: Int): List<Card>
 }
