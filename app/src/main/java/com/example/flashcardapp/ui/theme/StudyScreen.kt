@@ -197,15 +197,19 @@ private fun StudyCardContent(
                 btns.forEach { btn ->
                     Button(
                         onClick = { onAnswer(btn.q) },
-                        modifier = Modifier.weight(1f).height(64.dp),
-                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier.weight(1f).height(56.dp),
+                        shape = RoundedCornerShape(14.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = btn.color.copy(alpha = 0.15f)),
-                        border = BorderStroke(1.dp, btn.color)
+                        border = BorderStroke(1.dp, btn.color),
+                        contentPadding = PaddingValues(4.dp)
                     ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(btn.emoji, fontSize = 16.sp)
-                            Text(btn.q.label, color = btn.color, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                        }
+                        Text(
+                            btn.q.label,
+                            color = btn.color,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1
+                        )
                     }
                 }
             }
