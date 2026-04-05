@@ -10,6 +10,7 @@ import com.example.flashcardapp.ui.theme.HomeScreen
 import com.example.flashcardapp.ui.theme.StatsScreen
 import com.example.flashcardapp.ui.theme.StudyScreen
 import com.example.flashcardapp.viewmodel.CardViewModel
+import com.example.flashcardapp.ui.theme.SettingsScreen
 
 @Composable
 fun NavGraph(
@@ -23,7 +24,8 @@ fun NavGraph(
         composable("home") {
             HomeScreen(
                 viewModel = viewModel,
-                onDeckClick = { deckId -> navController.navigate("deck/$deckId") }
+                onDeckClick = { deckId -> navController.navigate("deck/$deckId") },
+                onSettingsClick = { navController.navigate("settings") }
             )
         }
 
@@ -61,6 +63,12 @@ fun NavGraph(
                 deckId    = deckId,
                 viewModel = viewModel,
                 onBack    = { navController.popBackStack() }
+            )
+        }
+
+        composable("settings") {
+            SettingsScreen(
+                onBack = { navController.popBackStack() }
             )
         }
 

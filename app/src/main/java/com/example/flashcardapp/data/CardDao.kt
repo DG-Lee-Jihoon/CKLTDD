@@ -40,4 +40,7 @@ interface CardDao {
 
     @Query("SELECT COUNT(*) FROM cards WHERE deckId = :deckId AND nextReviewDate <= :now")
     fun getDueCardCount(deckId: Long, now: Long = System.currentTimeMillis()): Flow<Int>
+
+    @Query("SELECT COUNT(*) FROM cards WHERE nextReviewDate <= :now")
+    suspend fun getAllDueCardsCount(now: Long): Int
 }

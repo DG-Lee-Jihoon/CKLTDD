@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.flashcardapp.data.Deck
@@ -27,7 +28,8 @@ import com.example.flashcardapp.viewmodel.CardViewModel
 @Composable
 fun HomeScreen(
     viewModel: CardViewModel,
-    onDeckClick: (Long) -> Unit
+    onDeckClick: (Long) -> Unit,
+    onSettingsClick: () -> Unit
 ) {
     val decks by viewModel.allDecks.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
@@ -38,7 +40,7 @@ fun HomeScreen(
             ExtendedFloatingActionButton(
                 onClick = { showDialog = true },
                 icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                text = { Text("Tạo bộ thẻ") },
+                text = { Text("Tao bo the") },
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 shape = RoundedCornerShape(16.dp)
@@ -51,19 +53,19 @@ fun HomeScreen(
                 .padding(padding),
             contentPadding = PaddingValues(bottom = 100.dp)
         ) {
-            // Header
             item {
-                HomeHeader(deckCount = decks.size)
+                HomeHeader(
+                    deckCount = decks.size,
+                    onSettingsClick = onSettingsClick
+                )
             }
 
-            // Empty state
             if (decks.isEmpty()) {
                 item {
                     EmptyState()
                 }
             }
 
-            // Deck list
             items(decks, key = { it.id }) { deck ->
                 DeckItem(
                     deck = deck,
@@ -87,7 +89,10 @@ fun HomeScreen(
 }
 
 @Composable
-fun HomeHeader(deckCount: Int) {
+fun HomeHeader(
+    deckCount: Int,
+    onSettingsClick: () -> Unit
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -99,8 +104,23 @@ fun HomeHeader(deckCount: Int) {
                     )
                 )
             )
-            .padding(horizontal = 24.dp, vertical = 36.dp)
+            .padding(horizontal = 24.dp, vertical = 28.dp)
     ) {
+        // Settings button top right
+        IconButton(
+            onClick = onSettingsClick,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .clip(RoundedCornerShape(12.dp))
+                .background(Color.White.copy(alpha = 0.2f))
+        ) {
+            Icon(
+                Icons.Outlined.Settings,
+                contentDescription = "Cai dat",
+                tint = Color.White
+            )
+        }
+
         Column {
             Text(
                 text = "Flashcard",
@@ -110,22 +130,28 @@ fun HomeHeader(deckCount: Int) {
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                text = "Học thông minh hơn mỗi ngày",
+                text = "Hoc thong minh hon moi ngay",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.85f)
             )
             Spacer(Modifier.height(20.dp))
             Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                StatPill(label = "$deckCount bộ thẻ", icon = Icons.Outlined.LibraryBooks)
+                StatPill(
+                    label = "$deckCount bo the",
+                    icon = Icons.Outlined.LibraryBooks
+                )
             }
         }
     }
 }
 
 @Composable
-fun StatPill(label: String, icon: androidx.compose.ui.graphics.vector.ImageVector) {
+fun StatPill(
+    label: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector
+) {
     Row(
         modifier = Modifier
             .clip(RoundedCornerShape(20.dp))
@@ -134,8 +160,17 @@ fun StatPill(label: String, icon: androidx.compose.ui.graphics.vector.ImageVecto
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
-        Text(label, color = Color.White, style = MaterialTheme.typography.labelLarge)
+        Icon(
+            icon,
+            contentDescription = null,
+            tint = Color.White,
+            modifier = Modifier.size(16.dp)
+        )
+        Text(
+            label,
+            color = Color.White,
+            style = MaterialTheme.typography.labelLarge
+        )
     }
 }
 
@@ -163,15 +198,15 @@ fun EmptyState() {
             )
         }
         Text(
-            "Chưa có bộ thẻ nào",
+            "Chua co bo the nao",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
         Text(
-            "Nhấn nút bên dưới để tạo\nbộ thẻ đầu tiên của bạn",
+            "Nhan nut ben duoi de tao\nbo the dau tien cua ban",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            textAlign = TextAlign.Center
         )
     }
 }
@@ -201,7 +236,7 @@ fun DeckItem(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Icon avatar
+            // Avatar
             Box(
                 modifier = Modifier
                     .size(52.dp)
@@ -226,6 +261,7 @@ fun DeckItem(
                     fontWeight = FontWeight.Bold
                 )
                 if (deck.description.isNotBlank()) {
+                    Spacer(Modifier.height(2.dp))
                     Text(
                         deck.description,
                         style = MaterialTheme.typography.bodySmall,
@@ -235,12 +271,21 @@ fun DeckItem(
                 }
                 Spacer(Modifier.height(8.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    MiniChip(text = "$totalCount thẻ", color = MaterialTheme.colorScheme.primaryContainer)
+                    MiniChip(
+                        text = "$totalCount the",
+                        color = MaterialTheme.colorScheme.primaryContainer
+                    )
                     if (dueCount > 0) {
                         MiniChip(
-                            text = "$dueCount cần ôn",
+                            text = "$dueCount can on",
                             color = ColorForgot.copy(alpha = 0.15f),
                             textColor = ColorForgot
+                        )
+                    } else {
+                        MiniChip(
+                            text = "Da on xong",
+                            color = ColorGood.copy(alpha = 0.15f),
+                            textColor = ColorGood
                         )
                     }
                 }
@@ -249,7 +294,7 @@ fun DeckItem(
             IconButton(onClick = onDelete) {
                 Icon(
                     Icons.Default.DeleteOutline,
-                    contentDescription = "Xoá",
+                    contentDescription = "Xoa",
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -269,7 +314,12 @@ fun MiniChip(
             .background(color)
             .padding(horizontal = 10.dp, vertical = 4.dp)
     ) {
-        Text(text, style = MaterialTheme.typography.labelMedium, color = textColor, fontWeight = FontWeight.Medium)
+        Text(
+            text,
+            style = MaterialTheme.typography.labelMedium,
+            color = textColor,
+            fontWeight = FontWeight.Medium
+        )
     }
 }
 
@@ -285,14 +335,14 @@ fun AddDeckDialog(
         onDismissRequest = onDismiss,
         shape = RoundedCornerShape(24.dp),
         title = {
-            Text("Tạo bộ thẻ mới", fontWeight = FontWeight.Bold)
+            Text("Tao bo the moi", fontWeight = FontWeight.Bold)
         },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Tên bộ thẻ *") },
+                    label = { Text("Ten bo the *") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp)
@@ -300,7 +350,7 @@ fun AddDeckDialog(
                 OutlinedTextField(
                     value = desc,
                     onValueChange = { desc = it },
-                    label = { Text("Mô tả (tuỳ chọn)") },
+                    label = { Text("Mo ta (tuy chon)") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp)
@@ -309,13 +359,19 @@ fun AddDeckDialog(
         },
         confirmButton = {
             Button(
-                onClick = { if (name.isNotBlank()) onConfirm(name.trim(), desc.trim()) },
+                onClick = {
+                    if (name.isNotBlank()) onConfirm(name.trim(), desc.trim())
+                },
                 enabled = name.isNotBlank(),
                 shape = RoundedCornerShape(12.dp)
-            ) { Text("Tạo") }
+            ) {
+                Text("Tao")
+            }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Huỷ") }
+            TextButton(onClick = onDismiss) {
+                Text("Huy")
+            }
         }
     )
 }

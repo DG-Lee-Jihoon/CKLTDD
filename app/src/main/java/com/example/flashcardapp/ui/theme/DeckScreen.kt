@@ -15,9 +15,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.flashcardapp.data.Card
+import com.example.flashcardapp.util.TtsHelper
 import com.example.flashcardapp.viewmodel.CardViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -31,7 +33,7 @@ fun DeckScreen(
     onStatsClick: () -> Unit,
     onBack: () -> Unit
 ) {
-    val cards by viewModel.getCardsByDeck(deckId).collectAsState(initial = emptyList())
+    val cards    by viewModel.getCardsByDeck(deckId).collectAsState(initial = emptyList())
     val dueCount by viewModel.getDueCardCount(deckId).collectAsState(initial = 0)
 
     Scaffold(
@@ -43,34 +45,34 @@ fun DeckScreen(
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Thêm thẻ")
+                Icon(Icons.Default.Add, contentDescription = "Them the")
             }
         }
     ) { padding ->
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(padding),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding),
             contentPadding = PaddingValues(bottom = 100.dp)
         ) {
-            // Header
             item {
                 DeckHeader(
-                    deckName = deckName,
-                    totalCards = cards.size,
-                    dueCount = dueCount,
-                    onBack = onBack,
+                    deckName    = deckName,
+                    totalCards  = cards.size,
+                    dueCount    = dueCount,
+                    onBack      = onBack,
                     onStudyClick = onStudyClick,
                     onStatsClick = onStatsClick
                 )
             }
 
-            // Section title
             item {
                 Row(
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        "Tất cả thẻ",
+                        "Tat ca the",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
@@ -94,20 +96,29 @@ fun DeckScreen(
             if (cards.isEmpty()) {
                 item {
                     Box(
-                        modifier = Modifier.fillMaxWidth().padding(top = 48.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 48.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
                             Icon(
                                 Icons.Outlined.NoteAdd,
                                 contentDescription = null,
                                 modifier = Modifier.size(48.dp),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
-                            Spacer(Modifier.height(12.dp))
                             Text(
-                                "Chưa có thẻ nào",
+                                "Chua co the nao",
                                 style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                "Nhan + de them the moi",
+                                style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
@@ -116,7 +127,10 @@ fun DeckScreen(
             }
 
             items(cards, key = { it.id }) { card ->
-                CardItem(card = card, onDelete = { viewModel.deleteCard(card) })
+                CardItem(
+                    card     = card,
+                    onDelete = { viewModel.deleteCard(card) }
+                )
             }
         }
     }
@@ -144,14 +158,13 @@ fun DeckHeader(
             )
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
-            // Back button
             IconButton(
                 onClick = onBack,
                 modifier = Modifier
                     .clip(RoundedCornerShape(12.dp))
                     .background(Color.White.copy(alpha = 0.2f))
             ) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Quay lại", tint = Color.White)
+                Icon(Icons.Default.ArrowBack, contentDescription = "Quay lai", tint = Color.White)
             }
 
             Spacer(Modifier.height(12.dp))
@@ -166,15 +179,16 @@ fun DeckHeader(
             Spacer(Modifier.height(6.dp))
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                StatPill(label = "$totalCards thẻ", icon = Icons.Outlined.Style)
+                StatPill(label = "$totalCards the", icon = Icons.Outlined.Style)
                 if (dueCount > 0) {
-                    StatPill(label = "$dueCount cần ôn", icon = Icons.Outlined.Notifications)
+                    StatPill(label = "$dueCount can on", icon = Icons.Outlined.Notifications)
+                } else {
+                    StatPill(label = "Da on xong", icon = Icons.Outlined.CheckCircle)
                 }
             }
 
             Spacer(Modifier.height(20.dp))
 
-            // Action buttons
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -193,21 +207,19 @@ fun DeckHeader(
                 ) {
                     Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(6.dp))
-                    Text("Ôn tập", fontWeight = FontWeight.Bold)
+                    Text("On tap", fontWeight = FontWeight.Bold)
                 }
 
                 OutlinedButton(
                     onClick = onStatsClick,
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
-                    border = ButtonDefaults.outlinedButtonBorder.copy(
-                        width = 1.5.dp
-                    ),
+                    border = ButtonDefaults.outlinedButtonBorder.copy(width = 1.5.dp),
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Icon(Icons.Outlined.BarChart, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(6.dp))
-                    Text("Thống kê", fontWeight = FontWeight.Bold)
+                    Text("Thong ke", fontWeight = FontWeight.Bold)
                 }
             }
 
@@ -217,13 +229,24 @@ fun DeckHeader(
 }
 
 @Composable
-fun CardItem(card: Card, onDelete: () -> Unit) {
+fun CardItem(
+    card: Card,
+    onDelete: () -> Unit
+) {
+    val context = LocalContext.current
+    val ttsHelper = remember { TtsHelper(context) }
+    DisposableEffect(Unit) {
+        onDispose { ttsHelper.shutdown() }
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 5.dp),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
         elevation = CardDefaults.cardElevation(1.dp)
     ) {
         Row(
@@ -245,14 +268,33 @@ fun CardItem(card: Card, onDelete: () -> Unit) {
                 )
                 Spacer(Modifier.height(8.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    MiniChip(text = "Lần ${card.repetition}", color = MaterialTheme.colorScheme.primaryContainer)
-                    MiniChip(text = "${card.interval}d", color = MaterialTheme.colorScheme.surfaceVariant)
+                    MiniChip(
+                        text  = "On: ${card.repetition}x",
+                        color = MaterialTheme.colorScheme.primaryContainer
+                    )
+                    MiniChip(
+                        text  = "${card.interval} ngay",
+                        color = MaterialTheme.colorScheme.surfaceVariant
+                    )
                 }
             }
+
+            // Nút đọc
+            IconButton(onClick = {
+                ttsHelper.speak("${card.front}. ${card.back}")
+            }) {
+                Icon(
+                    Icons.Default.VolumeUp,
+                    contentDescription = "Doc the",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            // Nút xóa
             IconButton(onClick = onDelete) {
                 Icon(
                     Icons.Default.DeleteOutline,
-                    contentDescription = "Xoá",
+                    contentDescription = "Xoa",
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }

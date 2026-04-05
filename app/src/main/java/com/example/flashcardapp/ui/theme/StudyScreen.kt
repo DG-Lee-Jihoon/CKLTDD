@@ -15,13 +15,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.flashcardapp.util.TtsHelper
 import com.example.flashcardapp.viewmodel.CardViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StudyScreen(
     deckId: Long,
@@ -29,14 +30,20 @@ fun StudyScreen(
     viewModel: CardViewModel,
     onBack: () -> Unit
 ) {
+    val context = LocalContext.current
+    val ttsHelper = remember { TtsHelper(context) }
+    DisposableEffect(Unit) {
+        onDispose { ttsHelper.shutdown() }
+    }
+
     LaunchedEffect(deckId) {
         viewModel.resetStudy()
         viewModel.loadDueCards(deckId)
     }
 
-    val currentCard by viewModel.currentCard.collectAsState()
-    val dueCards by viewModel.dueCards.collectAsState()
-    val currentIndex by viewModel.currentIndex.collectAsState()
+    val currentCard   by viewModel.currentCard.collectAsState()
+    val dueCards      by viewModel.dueCards.collectAsState()
+    val currentIndex  by viewModel.currentIndex.collectAsState()
     val studyFinished by viewModel.studyFinished.collectAsState()
 
     var isFlipped by remember { mutableStateOf(false) }
@@ -46,7 +53,10 @@ fun StudyScreen(
         label = "flip"
     )
 
-    LaunchedEffect(currentCard?.id) { isFlipped = false }
+    LaunchedEffect(currentCard?.id) {
+        isFlipped = false
+        currentCard?.let { ttsHelper.speak(it.front) }
+    }
 
     Box(
         modifier = Modifier
@@ -62,7 +72,7 @@ fun StudyScreen(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Top bar
+                    // ── Top bar ───────────────────────────────────
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -81,12 +91,19 @@ fun StudyScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             IconButton(
-                                onClick = onBack,
+                                onClick = {
+                                    ttsHelper.stop()
+                                    onBack()
+                                },
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(12.dp))
                                     .background(Color.White.copy(alpha = 0.2f))
                             ) {
-                                Icon(Icons.Default.Close, contentDescription = "Thoát", tint = Color.White)
+                                Icon(
+                                    Icons.Default.Close,
+                                    contentDescription = "Thoat",
+                                    tint = Color.White
+                                )
                             }
                             Spacer(Modifier.weight(1f))
                             Text(
@@ -104,29 +121,31 @@ fun StudyScreen(
                         }
                     }
 
-                    // Progress bar
+                    // ── Progress bar ──────────────────────────────
                     LinearProgressIndicator(
                         progress = {
                             if (dueCards.isEmpty()) 0f
                             else (currentIndex + 1).toFloat() / dueCards.size
                         },
-                        modifier = Modifier.fillMaxWidth().height(4.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(4.dp),
                         color = MaterialTheme.colorScheme.primary,
                         trackColor = MaterialTheme.colorScheme.primaryContainer
                     )
 
                     Spacer(Modifier.weight(0.5f))
 
-                    // Flip hint
                     Text(
-                        text = if (!isFlipped) "Nhấn thẻ để xem đáp án" else "Chọn mức độ ghi nhớ",
+                        text = if (!isFlipped) "Nhan the de xem dap an"
+                        else "Chon muc do ghi nho",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
                     Spacer(Modifier.height(12.dp))
 
-                    // Flashcard
+                    // ── Flashcard ─────────────────────────────────
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -137,9 +156,13 @@ fun StudyScreen(
                                 cameraDistance = 14f * density
                             }
                             .clip(RoundedCornerShape(24.dp))
-                            .clickable { isFlipped = !isFlipped }
+                            .clickable {
+                                isFlipped = !isFlipped
+                                if (isFlipped) ttsHelper.speak(card.back)
+                                else ttsHelper.speak(card.front)
+                            }
                     ) {
-                        // Front face
+                        // Mặt trước
                         if (rotation <= 90f) {
                             Box(
                                 modifier = Modifier
@@ -161,11 +184,13 @@ fun StudyScreen(
                                     Box(
                                         modifier = Modifier
                                             .clip(RoundedCornerShape(8.dp))
-                                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                                            .background(
+                                                MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                                            )
                                             .padding(horizontal = 12.dp, vertical = 4.dp)
                                     ) {
                                         Text(
-                                            "CÂU HỎI",
+                                            "CAU HOI",
                                             style = MaterialTheme.typography.labelMedium,
                                             color = MaterialTheme.colorScheme.primary,
                                             fontWeight = FontWeight.Bold,
@@ -180,10 +205,26 @@ fun StudyScreen(
                                         fontWeight = FontWeight.Medium,
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
+                                    Spacer(Modifier.height(16.dp))
+                                    IconButton(
+                                        onClick = { ttsHelper.speak(card.front) },
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .background(
+                                                MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                                            )
+                                    ) {
+                                        Icon(
+                                            Icons.Default.VolumeUp,
+                                            contentDescription = "Doc lai",
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
                                 }
                             }
                         }
-                        // Back face
+
+                        // Mặt sau
                         else {
                             Box(
                                 modifier = Modifier
@@ -210,7 +251,7 @@ fun StudyScreen(
                                             .padding(horizontal = 12.dp, vertical = 4.dp)
                                     ) {
                                         Text(
-                                            "ĐÁP ÁN",
+                                            "DAP AN",
                                             style = MaterialTheme.typography.labelMedium,
                                             color = Color(0xFF2E7D32),
                                             fontWeight = FontWeight.Bold,
@@ -225,6 +266,19 @@ fun StudyScreen(
                                         fontWeight = FontWeight.Medium,
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
+                                    Spacer(Modifier.height(16.dp))
+                                    IconButton(
+                                        onClick = { ttsHelper.speak(card.back) },
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .background(ColorGood.copy(alpha = 0.15f))
+                                    ) {
+                                        Icon(
+                                            Icons.Default.VolumeUp,
+                                            contentDescription = "Doc lai",
+                                            tint = Color(0xFF2E7D32)
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -232,7 +286,7 @@ fun StudyScreen(
 
                     Spacer(Modifier.weight(0.5f))
 
-                    // Rating buttons
+                    // ── Rating buttons ────────────────────────────
                     if (isFlipped) {
                         Column(
                             modifier = Modifier
@@ -245,15 +299,15 @@ fun StudyScreen(
                                 horizontalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
                                 RatingBtn(
-                                    label = "Quên",
-                                    sublabel = "Không nhớ",
+                                    label = "Quen",
+                                    sublabel = "Khong nho",
                                     color = ColorForgot,
                                     modifier = Modifier.weight(1f)
                                 ) { viewModel.rateCard(0) }
 
                                 RatingBtn(
-                                    label = "Khó",
-                                    sublabel = "Nhớ mờ",
+                                    label = "Kho",
+                                    sublabel = "Nho mo",
                                     color = ColorHard,
                                     modifier = Modifier.weight(1f)
                                 ) { viewModel.rateCard(2) }
@@ -263,15 +317,15 @@ fun StudyScreen(
                                 horizontalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
                                 RatingBtn(
-                                    label = "Tốt",
-                                    sublabel = "Nhớ được",
+                                    label = "Tot",
+                                    sublabel = "Nho duoc",
                                     color = ColorGood,
                                     modifier = Modifier.weight(1f)
                                 ) { viewModel.rateCard(4) }
 
                                 RatingBtn(
-                                    label = "Dễ",
-                                    sublabel = "Nhớ rõ",
+                                    label = "De",
+                                    sublabel = "Nho ro",
                                     color = ColorEasy,
                                     modifier = Modifier.weight(1f)
                                 ) { viewModel.rateCard(5) }
@@ -323,7 +377,10 @@ fun FinishedScreen(onBack: () -> Unit) {
                 .clip(RoundedCornerShape(28.dp))
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primaryContainer)
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primary,
+                            MaterialTheme.colorScheme.primaryContainer
+                        )
                     )
                 ),
             contentAlignment = Alignment.Center
@@ -337,14 +394,14 @@ fun FinishedScreen(onBack: () -> Unit) {
         }
         Spacer(Modifier.height(24.dp))
         Text(
-            "Xuất sắc!",
+            "Xuat sac!",
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.ExtraBold,
             color = MaterialTheme.colorScheme.primary
         )
         Spacer(Modifier.height(8.dp))
         Text(
-            "Bạn đã ôn tập xong\ntất cả thẻ hôm nay",
+            "Ban da on tap xong\ntat ca the hom nay",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
@@ -352,10 +409,12 @@ fun FinishedScreen(onBack: () -> Unit) {
         Spacer(Modifier.height(36.dp))
         Button(
             onClick = onBack,
-            modifier = Modifier.fillMaxWidth().height(52.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(52.dp),
             shape = RoundedCornerShape(16.dp)
         ) {
-            Text("Quay lại", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Text("Quay lai", fontWeight = FontWeight.Bold, fontSize = 16.sp)
         }
     }
 }

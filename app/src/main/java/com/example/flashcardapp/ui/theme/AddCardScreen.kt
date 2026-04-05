@@ -3,6 +3,7 @@ package com.example.flashcardapp.ui.theme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -13,6 +14,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.flashcardapp.viewmodel.CardViewModel
 
@@ -32,6 +36,7 @@ fun AddCardScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
+        // Header
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -60,7 +65,7 @@ fun AddCardScreen(
                 }
                 Spacer(Modifier.height(12.dp))
                 Text(
-                    "Them the moi",
+                    text = "Them the moi",
                     style = MaterialTheme.typography.headlineMedium,
                     color = Color.White,
                     fontWeight = FontWeight.Bold
@@ -68,7 +73,7 @@ fun AddCardScreen(
                 if (savedCount > 0) {
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        "Da luu $savedCount the",
+                        text = "Da luu $savedCount the",
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.White.copy(alpha = 0.85f)
                     )
@@ -76,6 +81,7 @@ fun AddCardScreen(
             }
         }
 
+        // Form
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -84,8 +90,9 @@ fun AddCardScreen(
         ) {
             Spacer(Modifier.height(4.dp))
 
+            // Mat truoc
             Text(
-                "Mat truoc",
+                text = "Mat truoc",
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold
@@ -93,19 +100,28 @@ fun AddCardScreen(
             OutlinedTextField(
                 value = front,
                 onValueChange = { front = it },
-                placeholder = { Text("Nhap cau hoi hoac tu can hoc...") },
+                placeholder = {
+                    Text("Nhap cau hoi hoac tu can hoc...")
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(130.dp),
                 shape = RoundedCornerShape(16.dp),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text,
+                    capitalization = KeyboardCapitalization.None,
+                    autoCorrect = false,
+                    imeAction = ImeAction.Next
+                ),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
                     unfocusedBorderColor = MaterialTheme.colorScheme.outline
                 )
             )
 
+            // Mat sau
             Text(
-                "Mat sau",
+                text = "Mat sau",
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold
@@ -113,19 +129,64 @@ fun AddCardScreen(
             OutlinedTextField(
                 value = back,
                 onValueChange = { back = it },
-                placeholder = { Text("Nhap dap an hoac dinh nghia...") },
+                placeholder = {
+                    Text("Nhap dap an hoac dinh nghia...")
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(130.dp),
                 shape = RoundedCornerShape(16.dp),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text,
+                    capitalization = KeyboardCapitalization.None,
+                    autoCorrect = false,
+                    imeAction = ImeAction.Done
+                ),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
                     unfocusedBorderColor = MaterialTheme.colorScheme.outline
                 )
             )
 
+            // Preview card
+            if (front.isNotBlank() || back.isNotBlank()) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    ),
+                    elevation = CardDefaults.cardElevation(0.dp)
+                ) {
+                    Column(modifier = Modifier.padding(14.dp)) {
+                        Text(
+                            text = "Xem truoc",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            text = if (front.isNotBlank()) front else "...",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Divider(
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
+                        )
+                        Text(
+                            text = if (back.isNotBlank()) back else "...",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
             Spacer(Modifier.weight(1f))
 
+            // Buttons
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)

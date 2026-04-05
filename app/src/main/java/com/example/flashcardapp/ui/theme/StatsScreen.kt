@@ -18,7 +18,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.flashcardapp.viewmodel.CardViewModel
 
 @Composable
@@ -35,7 +34,8 @@ fun StatsScreen(
     val masteredCards = cards.count { it.repetition >= 3 }
     val learningCards = cards.count { it.repetition in 1..2 }
     val newCards = cards.count { it.repetition == 0 }
-    val avgEF = if (cards.isEmpty()) 0f else cards.map { it.easeFactor }.average().toFloat()
+    val avgEF = if (cards.isEmpty()) 0f
+    else cards.map { it.easeFactor }.average().toFloat()
 
     LazyColumn(
         modifier = Modifier
@@ -43,7 +43,6 @@ fun StatsScreen(
             .background(MaterialTheme.colorScheme.background),
         contentPadding = PaddingValues(bottom = 32.dp)
     ) {
-        // Header
         item {
             Box(
                 modifier = Modifier
@@ -65,11 +64,15 @@ fun StatsScreen(
                             .clip(RoundedCornerShape(12.dp))
                             .background(Color.White.copy(alpha = 0.2f))
                     ) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Quay lại", tint = Color.White)
+                        Icon(
+                            Icons.Default.ArrowBack,
+                            contentDescription = "Quay lai",
+                            tint = Color.White
+                        )
                     }
                     Spacer(Modifier.height(12.dp))
                     Text(
-                        "Thống kê",
+                        "Thong ke",
                         style = MaterialTheme.typography.headlineMedium,
                         color = Color.White,
                         fontWeight = FontWeight.Bold
@@ -83,26 +86,24 @@ fun StatsScreen(
             }
         }
 
-        // Main stats
         item {
             Column(modifier = Modifier.padding(16.dp)) {
                 Spacer(Modifier.height(8.dp))
 
-                // Big stat cards row
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     BigStatCard(
                         value = totalCards.toString(),
-                        label = "Tổng thẻ",
+                        label = "Tong the",
                         icon = Icons.Outlined.Style,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.weight(1f)
                     )
                     BigStatCard(
                         value = dueCount.toString(),
-                        label = "Cần ôn",
+                        label = "Can on",
                         icon = Icons.Outlined.Notifications,
                         color = ColorForgot,
                         modifier = Modifier.weight(1f)
@@ -111,26 +112,25 @@ fun StatsScreen(
 
                 Spacer(Modifier.height(12.dp))
 
-                // Progress cards
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     SmallStatCard(
                         value = newCards.toString(),
-                        label = "Thẻ mới",
+                        label = "The moi",
                         color = ColorEasy,
                         modifier = Modifier.weight(1f)
                     )
                     SmallStatCard(
                         value = learningCards.toString(),
-                        label = "Đang học",
+                        label = "Dang hoc",
                         color = ColorHard,
                         modifier = Modifier.weight(1f)
                     )
                     SmallStatCard(
                         value = masteredCards.toString(),
-                        label = "Thuộc",
+                        label = "Thuoc",
                         color = ColorGood,
                         modifier = Modifier.weight(1f)
                     )
@@ -138,11 +138,12 @@ fun StatsScreen(
 
                 Spacer(Modifier.height(12.dp))
 
-                // Progress bar card
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    ),
                     elevation = CardDefaults.cardElevation(2.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
@@ -152,12 +153,12 @@ fun StatsScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                "Tiến độ thuộc bài",
+                                "Tien do thuoc bai",
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                "${if (totalCards > 0) (masteredCards * 100 / totalCards) else 0}%",
+                                "${if (totalCards > 0) masteredCards * 100 / totalCards else 0}%",
                                 style = MaterialTheme.typography.titleMedium,
                                 color = MaterialTheme.colorScheme.primary,
                                 fontWeight = FontWeight.ExtraBold
@@ -169,13 +170,16 @@ fun StatsScreen(
                                 if (totalCards == 0) 0f
                                 else masteredCards.toFloat() / totalCards
                             },
-                            modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(8.dp)
+                                .clip(RoundedCornerShape(4.dp)),
                             color = ColorGood,
                             trackColor = MaterialTheme.colorScheme.surfaceVariant
                         )
                         Spacer(Modifier.height(8.dp))
                         Text(
-                            "Độ khó trung bình: ${"%.2f".format(avgEF)}",
+                            "Do kho trung binh: ${"%.2f".format(avgEF)}",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -183,9 +187,8 @@ fun StatsScreen(
                 }
 
                 Spacer(Modifier.height(20.dp))
-
                 Text(
-                    "Chi tiết từng thẻ",
+                    "Chi tiet tung the",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -199,11 +202,17 @@ fun StatsScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 4.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
                 elevation = CardDefaults.cardElevation(1.dp)
             ) {
                 Column(modifier = Modifier.padding(14.dp)) {
-                    Text(card.front, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+                    Text(
+                        card.front,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
                     Spacer(Modifier.height(4.dp))
                     Text(
                         card.back,
@@ -212,15 +221,24 @@ fun StatsScreen(
                     )
                     Spacer(Modifier.height(10.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        MiniChip(text = "Ôn: ${card.repetition}x", color = MaterialTheme.colorScheme.primaryContainer)
-                        MiniChip(text = "${card.interval} ngày", color = MaterialTheme.colorScheme.surfaceVariant)
+                        MiniChip(
+                            text = "On: ${card.repetition}x",
+                            color = MaterialTheme.colorScheme.primaryContainer
+                        )
+                        MiniChip(
+                            text = "${card.interval} ngay",
+                            color = MaterialTheme.colorScheme.surfaceVariant
+                        )
                         MiniChip(
                             text = "EF: ${"%.1f".format(card.easeFactor)}",
                             color = if (card.easeFactor >= 2.5f)
                                 ColorGood.copy(alpha = 0.15f)
                             else
                                 ColorHard.copy(alpha = 0.15f),
-                            textColor = if (card.easeFactor >= 2.5f) Color(0xFF2E7D32) else Color(0xFFE65100)
+                            textColor = if (card.easeFactor >= 2.5f)
+                                Color(0xFF2E7D32)
+                            else
+                                Color(0xFFE65100)
                         )
                     }
                 }
@@ -240,14 +258,21 @@ fun BigStatCard(
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.1f)),
+        colors = CardDefaults.cardColors(
+            containerColor = color.copy(alpha = 0.1f)
+        ),
         elevation = CardDefaults.cardElevation(0.dp)
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
             horizontalAlignment = Alignment.Start
         ) {
-            Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(24.dp))
+            Icon(
+                icon,
+                contentDescription = null,
+                tint = color,
+                modifier = Modifier.size(24.dp)
+            )
             Spacer(Modifier.height(8.dp))
             Text(
                 value,
@@ -274,11 +299,15 @@ fun SmallStatCard(
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.12f)),
+        colors = CardDefaults.cardColors(
+            containerColor = color.copy(alpha = 0.12f)
+        ),
         elevation = CardDefaults.cardElevation(0.dp)
     ) {
         Column(
-            modifier = Modifier.padding(12.dp).fillMaxWidth(),
+            modifier = Modifier
+                .padding(12.dp)
+                .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
