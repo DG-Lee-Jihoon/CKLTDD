@@ -40,7 +40,6 @@ fun SettingsScreen(onBack: () -> Unit) {
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // ── Header ────────────────────────────────────
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -61,17 +60,17 @@ fun SettingsScreen(onBack: () -> Unit) {
                         .clip(RoundedCornerShape(12.dp))
                         .background(Color.White.copy(alpha = 0.2f))
                 ) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Quay lai", tint = Color.White)
+                    Icon(Icons.Default.ArrowBack, contentDescription = "Quay lại", tint = Color.White)
                 }
                 Spacer(Modifier.height(12.dp))
                 Text(
-                    "Cai dat",
+                    "Cài đặt",
                     style = MaterialTheme.typography.headlineMedium,
                     color = Color.White,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    "Tuy chinh lich hoc cua ban",
+                    "Tùy chỉnh lịch học của bạn",
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.White.copy(alpha = 0.85f)
                 )
@@ -86,31 +85,28 @@ fun SettingsScreen(onBack: () -> Unit) {
         ) {
             Spacer(Modifier.height(4.dp))
 
-            // ── NÚT TEST (xóa sau khi test xong) ─────
             Button(
                 onClick = {
-                    android.util.Log.d("ReminderTest", "Bam nut test!")
+                    android.util.Log.d("ReminderTest", "Bấm nút test!")
                     val request = OneTimeWorkRequestBuilder<ReminderWorker>().build()
                     WorkManager.getInstance(context).enqueue(request)
-                    android.util.Log.d("ReminderTest", "Worker da duoc enqueue!")
+                    android.util.Log.d("ReminderTest", "Worker đã được enqueue!")
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.error
                 )
             ) {
-                Text("TEST THONG BAO NGAY", fontWeight = FontWeight.Bold)
+                Text("TEST THÔNG BÁO NGAY", fontWeight = FontWeight.Bold)
             }
 
-            // ── Section nhắc nhở ──────────────────────
             Text(
-                "Nhac nho hoc tap",
+                "Nhắc nhở học tập",
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold
             )
 
-            // Toggle bật/tắt
             SettingsCard {
                 Row(
                     modifier = Modifier
@@ -127,12 +123,12 @@ fun SettingsScreen(onBack: () -> Unit) {
                     Spacer(Modifier.width(14.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            "Bat nhac nho",
+                            "Bật nhắc nhở",
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Medium
                         )
                         Text(
-                            "Nhan thong bao khi co the can on",
+                            "Nhận thông báo khi có thẻ cần ôn",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -152,7 +148,6 @@ fun SettingsScreen(onBack: () -> Unit) {
                 }
             }
 
-            // Chọn giờ (chỉ hiện khi bật nhắc nhở)
             if (reminderEnabled) {
                 SettingsCard {
                     Row(
@@ -179,12 +174,12 @@ fun SettingsScreen(onBack: () -> Unit) {
                         Spacer(Modifier.width(14.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                "Gio nhac nho",
+                                "Giờ nhắc nhở",
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = FontWeight.Medium
                             )
                             Text(
-                                "Nhan de thay doi gio",
+                                "Nhấn để thay đổi giờ",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -205,9 +200,8 @@ fun SettingsScreen(onBack: () -> Unit) {
                     }
                 }
 
-                // Quick presets
                 Text(
-                    "Chon nhanh",
+                    "Chọn nhanh",
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold
@@ -218,10 +212,10 @@ fun SettingsScreen(onBack: () -> Unit) {
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     listOf(
-                        Triple("Sang",  7,  0),
-                        Triple("Trua",  12, 0),
-                        Triple("Chieu", 17, 0),
-                        Triple("Toi",   20, 0)
+                        Triple("Sáng",  7,  0),
+                        Triple("Trưa",  12, 0),
+                        Triple("Chiều", 17, 0),
+                        Triple("Tối",   20, 0)
                     ).forEach { (label, hour, minute) ->
                         val isSelected = selectedHour == hour && selectedMinute == minute
                         FilterChip(
@@ -248,10 +242,9 @@ fun SettingsScreen(onBack: () -> Unit) {
                 }
             }
 
-            // ── Section thông tin ─────────────────────
             Spacer(Modifier.height(4.dp))
             Text(
-                "Thong tin",
+                "Thông tin",
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold
@@ -261,25 +254,24 @@ fun SettingsScreen(onBack: () -> Unit) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     SettingsInfoRow(
                         icon  = Icons.Outlined.Psychology,
-                        label = "Thuat toan",
+                        label = "Thuật toán",
                         value = "SuperMemo SM-2"
                     )
                     Divider(modifier = Modifier.padding(vertical = 8.dp))
                     SettingsInfoRow(
                         icon  = Icons.Outlined.Repeat,
-                        label = "Lap lai toi thieu",
-                        value = "1 ngay"
+                        label = "Lặp lại tối thiểu",
+                        value = "1 ngày"
                     )
                     Divider(modifier = Modifier.padding(vertical = 8.dp))
                     SettingsInfoRow(
                         icon  = Icons.Outlined.TrendingUp,
-                        label = "He so kho mac dinh",
+                        label = "Hệ số khó mặc định",
                         value = "2.5"
                     )
                 }
             }
 
-            // ── Thông báo đã lưu ──────────────────────
             if (showSaved) {
                 LaunchedEffect(showSaved) {
                     kotlinx.coroutines.delay(2000)
@@ -304,7 +296,7 @@ fun SettingsScreen(onBack: () -> Unit) {
                             modifier = Modifier.size(20.dp)
                         )
                         Text(
-                            "Da luu lich nhac nho luc %02d:%02d".format(selectedHour, selectedMinute),
+                            "Đã lưu lịch nhắc nhở lúc %02d:%02d".format(selectedHour, selectedMinute),
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color(0xFF2E7D32),
                             fontWeight = FontWeight.Medium

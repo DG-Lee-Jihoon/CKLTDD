@@ -64,15 +64,11 @@ fun StatsScreen(
                             .clip(RoundedCornerShape(12.dp))
                             .background(Color.White.copy(alpha = 0.2f))
                     ) {
-                        Icon(
-                            Icons.Default.ArrowBack,
-                            contentDescription = "Quay lai",
-                            tint = Color.White
-                        )
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Quay lại", tint = Color.White)
                     }
                     Spacer(Modifier.height(12.dp))
                     Text(
-                        "Thong ke",
+                        "Thống kê",
                         style = MaterialTheme.typography.headlineMedium,
                         color = Color.White,
                         fontWeight = FontWeight.Bold
@@ -96,14 +92,14 @@ fun StatsScreen(
                 ) {
                     BigStatCard(
                         value = totalCards.toString(),
-                        label = "Tong the",
+                        label = "Tổng thẻ",
                         icon = Icons.Outlined.Style,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.weight(1f)
                     )
                     BigStatCard(
                         value = dueCount.toString(),
-                        label = "Can on",
+                        label = "Cần ôn",
                         icon = Icons.Outlined.Notifications,
                         color = ColorForgot,
                         modifier = Modifier.weight(1f)
@@ -118,19 +114,19 @@ fun StatsScreen(
                 ) {
                     SmallStatCard(
                         value = newCards.toString(),
-                        label = "The moi",
+                        label = "Thẻ mới",
                         color = ColorEasy,
                         modifier = Modifier.weight(1f)
                     )
                     SmallStatCard(
                         value = learningCards.toString(),
-                        label = "Dang hoc",
+                        label = "Đang học",
                         color = ColorHard,
                         modifier = Modifier.weight(1f)
                     )
                     SmallStatCard(
                         value = masteredCards.toString(),
-                        label = "Thuoc",
+                        label = "Thuộc",
                         color = ColorGood,
                         modifier = Modifier.weight(1f)
                     )
@@ -141,9 +137,7 @@ fun StatsScreen(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    ),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                     elevation = CardDefaults.cardElevation(2.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
@@ -153,7 +147,7 @@ fun StatsScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                "Tien do thuoc bai",
+                                "Tiến độ thuộc bài",
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold
                             )
@@ -179,7 +173,7 @@ fun StatsScreen(
                         )
                         Spacer(Modifier.height(8.dp))
                         Text(
-                            "Do kho trung binh: ${"%.2f".format(avgEF)}",
+                            "Độ khó trung bình: ${"%.2f".format(avgEF)}",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -188,7 +182,7 @@ fun StatsScreen(
 
                 Spacer(Modifier.height(20.dp))
                 Text(
-                    "Chi tiet tung the",
+                    "Chi tiết từng thẻ",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -202,43 +196,21 @@ fun StatsScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 4.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(1.dp)
             ) {
                 Column(modifier = Modifier.padding(14.dp)) {
-                    Text(
-                        card.front,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                    Text(card.front, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
                     Spacer(Modifier.height(4.dp))
-                    Text(
-                        card.back,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Text(card.back, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(Modifier.height(10.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        MiniChip(
-                            text = "On: ${card.repetition}x",
-                            color = MaterialTheme.colorScheme.primaryContainer
-                        )
-                        MiniChip(
-                            text = "${card.interval} ngay",
-                            color = MaterialTheme.colorScheme.surfaceVariant
-                        )
+                        MiniChip(text = "Ôn: ${card.repetition}x", color = MaterialTheme.colorScheme.primaryContainer)
+                        MiniChip(text = "${card.interval} ngày", color = MaterialTheme.colorScheme.surfaceVariant)
                         MiniChip(
                             text = "EF: ${"%.1f".format(card.easeFactor)}",
-                            color = if (card.easeFactor >= 2.5f)
-                                ColorGood.copy(alpha = 0.15f)
-                            else
-                                ColorHard.copy(alpha = 0.15f),
-                            textColor = if (card.easeFactor >= 2.5f)
-                                Color(0xFF2E7D32)
-                            else
-                                Color(0xFFE65100)
+                            color = if (card.easeFactor >= 2.5f) ColorGood.copy(alpha = 0.15f) else ColorHard.copy(alpha = 0.15f),
+                            textColor = if (card.easeFactor >= 2.5f) Color(0xFF2E7D32) else Color(0xFFE65100)
                         )
                     }
                 }
@@ -248,79 +220,36 @@ fun StatsScreen(
 }
 
 @Composable
-fun BigStatCard(
-    value: String,
-    label: String,
-    icon: ImageVector,
-    color: Color,
-    modifier: Modifier = Modifier
-) {
+fun BigStatCard(value: String, label: String, icon: ImageVector, color: Color, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = color.copy(alpha = 0.1f)
-        ),
+        colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.1f)),
         elevation = CardDefaults.cardElevation(0.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.Start
-        ) {
-            Icon(
-                icon,
-                contentDescription = null,
-                tint = color,
-                modifier = Modifier.size(24.dp)
-            )
+        Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.Start) {
+            Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(24.dp))
             Spacer(Modifier.height(8.dp))
-            Text(
-                value,
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.ExtraBold,
-                color = color
-            )
-            Text(
-                label,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Text(value, style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.ExtraBold, color = color)
+            Text(label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
 
 @Composable
-fun SmallStatCard(
-    value: String,
-    label: String,
-    color: Color,
-    modifier: Modifier = Modifier
-) {
+fun SmallStatCard(value: String, label: String, color: Color, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = color.copy(alpha = 0.12f)
-        ),
+        colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.12f)),
         elevation = CardDefaults.cardElevation(0.dp)
     ) {
         Column(
-            modifier = Modifier
-                .padding(12.dp)
-                .fillMaxWidth(),
+            modifier = Modifier.padding(12.dp).fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                value,
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.ExtraBold,
-                color = color
-            )
-            Text(
-                label,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Text(value, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold, color = color)
+            Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }

@@ -45,7 +45,7 @@ fun DeckScreen(
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Them the")
+                Icon(Icons.Default.Add, contentDescription = "Thêm thẻ")
             }
         }
     ) { padding ->
@@ -72,7 +72,7 @@ fun DeckScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        "Tat ca the",
+                        "Tất cả thẻ",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
@@ -112,12 +112,12 @@ fun DeckScreen(
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Text(
-                                "Chua co the nao",
+                                "Chưa có thẻ nào",
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Text(
-                                "Nhan + de them the moi",
+                                "Nhấn + để thêm thẻ mới",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -164,7 +164,7 @@ fun DeckHeader(
                     .clip(RoundedCornerShape(12.dp))
                     .background(Color.White.copy(alpha = 0.2f))
             ) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Quay lai", tint = Color.White)
+                Icon(Icons.Default.ArrowBack, contentDescription = "Quay lại", tint = Color.White)
             }
 
             Spacer(Modifier.height(12.dp))
@@ -179,11 +179,11 @@ fun DeckHeader(
             Spacer(Modifier.height(6.dp))
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                StatPill(label = "$totalCards the", icon = Icons.Outlined.Style)
+                StatPill(label = "$totalCards thẻ", icon = Icons.Outlined.Style)
                 if (dueCount > 0) {
-                    StatPill(label = "$dueCount can on", icon = Icons.Outlined.Notifications)
+                    StatPill(label = "$dueCount cần ôn", icon = Icons.Outlined.Notifications)
                 } else {
-                    StatPill(label = "Da on xong", icon = Icons.Outlined.CheckCircle)
+                    StatPill(label = "Đã ôn xong", icon = Icons.Outlined.CheckCircle)
                 }
             }
 
@@ -207,7 +207,7 @@ fun DeckHeader(
                 ) {
                     Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(6.dp))
-                    Text("On tap", fontWeight = FontWeight.Bold)
+                    Text("Ôn tập", fontWeight = FontWeight.Bold)
                 }
 
                 OutlinedButton(
@@ -219,7 +219,7 @@ fun DeckHeader(
                 ) {
                     Icon(Icons.Outlined.BarChart, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(6.dp))
-                    Text("Thong ke", fontWeight = FontWeight.Bold)
+                    Text("Thống kê", fontWeight = FontWeight.Bold)
                 }
             }
 
@@ -269,32 +269,30 @@ fun CardItem(
                 Spacer(Modifier.height(8.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     MiniChip(
-                        text  = "On: ${card.repetition}x",
+                        text  = "Ôn: ${card.repetition}x",
                         color = MaterialTheme.colorScheme.primaryContainer
                     )
                     MiniChip(
-                        text  = "${card.interval} ngay",
+                        text  = "${card.interval} ngày",
                         color = MaterialTheme.colorScheme.surfaceVariant
                     )
                 }
             }
 
-            // Nút đọc
             IconButton(onClick = {
                 ttsHelper.speak("${card.front}. ${card.back}")
             }) {
                 Icon(
                     Icons.Default.VolumeUp,
-                    contentDescription = "Doc the",
+                    contentDescription = "Đọc thẻ",
                     tint = MaterialTheme.colorScheme.primary
                 )
             }
 
-            // Nút xóa
             IconButton(onClick = onDelete) {
                 Icon(
                     Icons.Default.DeleteOutline,
-                    contentDescription = "Xoa",
+                    contentDescription = "Xóa",
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }

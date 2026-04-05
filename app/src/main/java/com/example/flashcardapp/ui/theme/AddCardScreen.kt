@@ -36,7 +36,6 @@ fun AddCardScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // Header
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -59,13 +58,13 @@ fun AddCardScreen(
                 ) {
                     Icon(
                         Icons.Default.ArrowBack,
-                        contentDescription = "Quay lai",
+                        contentDescription = "Quay lại",
                         tint = Color.White
                     )
                 }
                 Spacer(Modifier.height(12.dp))
                 Text(
-                    text = "Them the moi",
+                    text = "Thêm thẻ mới",
                     style = MaterialTheme.typography.headlineMedium,
                     color = Color.White,
                     fontWeight = FontWeight.Bold
@@ -73,7 +72,7 @@ fun AddCardScreen(
                 if (savedCount > 0) {
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = "Da luu $savedCount the",
+                        text = "Đã lưu $savedCount thẻ",
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.White.copy(alpha = 0.85f)
                     )
@@ -81,7 +80,6 @@ fun AddCardScreen(
             }
         }
 
-        // Form
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -90,9 +88,8 @@ fun AddCardScreen(
         ) {
             Spacer(Modifier.height(4.dp))
 
-            // Mat truoc
             Text(
-                text = "Mat truoc",
+                text = "Mặt trước",
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold
@@ -101,7 +98,7 @@ fun AddCardScreen(
                 value = front,
                 onValueChange = { front = it },
                 placeholder = {
-                    Text("Nhap cau hoi hoac tu can hoc...")
+                    Text("Nhập câu hỏi hoặc từ cần học...")
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -119,9 +116,8 @@ fun AddCardScreen(
                 )
             )
 
-            // Mat sau
             Text(
-                text = "Mat sau",
+                text = "Mặt sau",
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold
@@ -130,7 +126,7 @@ fun AddCardScreen(
                 value = back,
                 onValueChange = { back = it },
                 placeholder = {
-                    Text("Nhap dap an hoac dinh nghia...")
+                    Text("Nhập đáp án hoặc định nghĩa...")
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -148,7 +144,6 @@ fun AddCardScreen(
                 )
             )
 
-            // Preview card
             if (front.isNotBlank() || back.isNotBlank()) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -160,7 +155,7 @@ fun AddCardScreen(
                 ) {
                     Column(modifier = Modifier.padding(14.dp)) {
                         Text(
-                            text = "Xem truoc",
+                            text = "Xem trước",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontWeight = FontWeight.Bold
@@ -186,7 +181,6 @@ fun AddCardScreen(
 
             Spacer(Modifier.weight(1f))
 
-            // Buttons
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -212,7 +206,7 @@ fun AddCardScreen(
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(Modifier.width(6.dp))
-                    Text("Luu + tiep", fontWeight = FontWeight.Bold)
+                    Text("Lưu + tiếp", fontWeight = FontWeight.Bold)
                 }
 
                 Button(
@@ -234,7 +228,7 @@ fun AddCardScreen(
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(Modifier.width(6.dp))
-                    Text("Luu + xong", fontWeight = FontWeight.Bold)
+                    Text("Lưu + xong", fontWeight = FontWeight.Bold)
                 }
             }
 

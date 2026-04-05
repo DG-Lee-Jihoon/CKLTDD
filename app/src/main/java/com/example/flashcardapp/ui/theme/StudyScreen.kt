@@ -32,9 +32,7 @@ fun StudyScreen(
 ) {
     val context = LocalContext.current
     val ttsHelper = remember { TtsHelper(context) }
-    DisposableEffect(Unit) {
-        onDispose { ttsHelper.shutdown() }
-    }
+    DisposableEffect(Unit) { onDispose { ttsHelper.shutdown() } }
 
     LaunchedEffect(deckId) {
         viewModel.resetStudy()
@@ -72,7 +70,6 @@ fun StudyScreen(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // ── Top bar ───────────────────────────────────
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -91,45 +88,26 @@ fun StudyScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             IconButton(
-                                onClick = {
-                                    ttsHelper.stop()
-                                    onBack()
-                                },
+                                onClick = { ttsHelper.stop(); onBack() },
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(12.dp))
                                     .background(Color.White.copy(alpha = 0.2f))
                             ) {
-                                Icon(
-                                    Icons.Default.Close,
-                                    contentDescription = "Thoat",
-                                    tint = Color.White
-                                )
+                                Icon(Icons.Default.Close, contentDescription = "Thoát", tint = Color.White)
                             }
                             Spacer(Modifier.weight(1f))
-                            Text(
-                                deckName,
-                                style = MaterialTheme.typography.titleMedium,
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold
-                            )
+                            Text(deckName, style = MaterialTheme.typography.titleMedium, color = Color.White, fontWeight = FontWeight.Bold)
                             Spacer(Modifier.weight(1f))
-                            Text(
-                                "${currentIndex + 1}/${dueCards.size}",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = Color.White.copy(alpha = 0.85f)
-                            )
+                            Text("${currentIndex + 1}/${dueCards.size}", style = MaterialTheme.typography.labelLarge, color = Color.White.copy(alpha = 0.85f))
                         }
                     }
 
-                    // ── Progress bar ──────────────────────────────
                     LinearProgressIndicator(
                         progress = {
                             if (dueCards.isEmpty()) 0f
                             else (currentIndex + 1).toFloat() / dueCards.size
                         },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(4.dp),
+                        modifier = Modifier.fillMaxWidth().height(4.dp),
                         color = MaterialTheme.colorScheme.primary,
                         trackColor = MaterialTheme.colorScheme.primaryContainer
                     )
@@ -137,24 +115,19 @@ fun StudyScreen(
                     Spacer(Modifier.weight(0.5f))
 
                     Text(
-                        text = if (!isFlipped) "Nhan the de xem dap an"
-                        else "Chon muc do ghi nho",
+                        text = if (!isFlipped) "Nhấn thẻ để xem đáp án" else "Chọn mức độ ghi nhớ",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
                     Spacer(Modifier.height(12.dp))
 
-                    // ── Flashcard ─────────────────────────────────
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 20.dp)
                             .height(300.dp)
-                            .graphicsLayer {
-                                rotationY = rotation
-                                cameraDistance = 14f * density
-                            }
+                            .graphicsLayer { rotationY = rotation; cameraDistance = 14f * density }
                             .clip(RoundedCornerShape(24.dp))
                             .clickable {
                                 isFlipped = !isFlipped
@@ -162,7 +135,6 @@ fun StudyScreen(
                                 else ttsHelper.speak(card.front)
                             }
                     ) {
-                        // Mặt trước
                         if (rotation <= 90f) {
                             Box(
                                 modifier = Modifier
@@ -184,13 +156,11 @@ fun StudyScreen(
                                     Box(
                                         modifier = Modifier
                                             .clip(RoundedCornerShape(8.dp))
-                                            .background(
-                                                MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                                            )
+                                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
                                             .padding(horizontal = 12.dp, vertical = 4.dp)
                                     ) {
                                         Text(
-                                            "CAU HOI",
+                                            "CÂU HỎI",
                                             style = MaterialTheme.typography.labelMedium,
                                             color = MaterialTheme.colorScheme.primary,
                                             fontWeight = FontWeight.Bold,
@@ -210,32 +180,20 @@ fun StudyScreen(
                                         onClick = { ttsHelper.speak(card.front) },
                                         modifier = Modifier
                                             .clip(RoundedCornerShape(12.dp))
-                                            .background(
-                                                MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                                            )
+                                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
                                     ) {
-                                        Icon(
-                                            Icons.Default.VolumeUp,
-                                            contentDescription = "Doc lai",
-                                            tint = MaterialTheme.colorScheme.primary
-                                        )
+                                        Icon(Icons.Default.VolumeUp, contentDescription = "Đọc lại", tint = MaterialTheme.colorScheme.primary)
                                     }
                                 }
                             }
-                        }
-
-                        // Mặt sau
-                        else {
+                        } else {
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .graphicsLayer { rotationY = 180f }
                                     .background(
                                         Brush.verticalGradient(
-                                            colors = listOf(
-                                                Color(0xFFE8F5E9),
-                                                MaterialTheme.colorScheme.surface
-                                            )
+                                            colors = listOf(Color(0xFFE8F5E9), MaterialTheme.colorScheme.surface)
                                         )
                                     ),
                                 contentAlignment = Alignment.Center
@@ -251,7 +209,7 @@ fun StudyScreen(
                                             .padding(horizontal = 12.dp, vertical = 4.dp)
                                     ) {
                                         Text(
-                                            "DAP AN",
+                                            "ĐÁP ÁN",
                                             style = MaterialTheme.typography.labelMedium,
                                             color = Color(0xFF2E7D32),
                                             fontWeight = FontWeight.Bold,
@@ -273,11 +231,7 @@ fun StudyScreen(
                                             .clip(RoundedCornerShape(12.dp))
                                             .background(ColorGood.copy(alpha = 0.15f))
                                     ) {
-                                        Icon(
-                                            Icons.Default.VolumeUp,
-                                            contentDescription = "Doc lai",
-                                            tint = Color(0xFF2E7D32)
-                                        )
+                                        Icon(Icons.Default.VolumeUp, contentDescription = "Đọc lại", tint = Color(0xFF2E7D32))
                                     }
                                 }
                             }
@@ -286,49 +240,18 @@ fun StudyScreen(
 
                     Spacer(Modifier.weight(0.5f))
 
-                    // ── Rating buttons ────────────────────────────
                     if (isFlipped) {
                         Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 20.dp),
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
                             verticalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                RatingBtn(
-                                    label = "Quen",
-                                    sublabel = "Khong nho",
-                                    color = ColorForgot,
-                                    modifier = Modifier.weight(1f)
-                                ) { viewModel.rateCard(0) }
-
-                                RatingBtn(
-                                    label = "Kho",
-                                    sublabel = "Nho mo",
-                                    color = ColorHard,
-                                    modifier = Modifier.weight(1f)
-                                ) { viewModel.rateCard(2) }
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                RatingBtn(label = "Quên", sublabel = "Không nhớ", color = ColorForgot, modifier = Modifier.weight(1f)) { viewModel.rateCard(0) }
+                                RatingBtn(label = "Khó", sublabel = "Nhớ mờ", color = ColorHard, modifier = Modifier.weight(1f)) { viewModel.rateCard(2) }
                             }
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                RatingBtn(
-                                    label = "Tot",
-                                    sublabel = "Nho duoc",
-                                    color = ColorGood,
-                                    modifier = Modifier.weight(1f)
-                                ) { viewModel.rateCard(4) }
-
-                                RatingBtn(
-                                    label = "De",
-                                    sublabel = "Nho ro",
-                                    color = ColorEasy,
-                                    modifier = Modifier.weight(1f)
-                                ) { viewModel.rateCard(5) }
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                RatingBtn(label = "Tốt", sublabel = "Nhớ được", color = ColorGood, modifier = Modifier.weight(1f)) { viewModel.rateCard(4) }
+                                RatingBtn(label = "Dễ", sublabel = "Nhớ rõ", color = ColorEasy, modifier = Modifier.weight(1f)) { viewModel.rateCard(5) }
                             }
                         }
                     }
@@ -341,13 +264,7 @@ fun StudyScreen(
 }
 
 @Composable
-fun RatingBtn(
-    label: String,
-    sublabel: String,
-    color: Color,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
+fun RatingBtn(label: String, sublabel: String, color: Color, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Button(
         onClick = onClick,
         modifier = modifier.height(64.dp),
@@ -365,9 +282,7 @@ fun RatingBtn(
 @Composable
 fun FinishedScreen(onBack: () -> Unit) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
+        modifier = Modifier.fillMaxSize().padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -377,31 +292,23 @@ fun FinishedScreen(onBack: () -> Unit) {
                 .clip(RoundedCornerShape(28.dp))
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.primary,
-                            MaterialTheme.colorScheme.primaryContainer
-                        )
+                        colors = listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primaryContainer)
                     )
                 ),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                Icons.Default.EmojiEvents,
-                contentDescription = null,
-                modifier = Modifier.size(52.dp),
-                tint = Color.White
-            )
+            Icon(Icons.Default.EmojiEvents, contentDescription = null, modifier = Modifier.size(52.dp), tint = Color.White)
         }
         Spacer(Modifier.height(24.dp))
         Text(
-            "Xuat sac!",
+            "Xuất sắc!",
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.ExtraBold,
             color = MaterialTheme.colorScheme.primary
         )
         Spacer(Modifier.height(8.dp))
         Text(
-            "Ban da on tap xong\ntat ca the hom nay",
+            "Bạn đã ôn tập xong\ntất cả thẻ hôm nay",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
@@ -409,12 +316,10 @@ fun FinishedScreen(onBack: () -> Unit) {
         Spacer(Modifier.height(36.dp))
         Button(
             onClick = onBack,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp),
+            modifier = Modifier.fillMaxWidth().height(52.dp),
             shape = RoundedCornerShape(16.dp)
         ) {
-            Text("Quay lai", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Text("Quay lại", fontWeight = FontWeight.Bold, fontSize = 16.sp)
         }
     }
 }
