@@ -6,6 +6,18 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <!-- Quyền khởi động lại lịch sau khi tắt máy -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <!-- Quyền âm thanh -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+    <!-- Quyền TTS -->
+    <uses-permission android:name="android.permission.BIND_TEXT_TO_SPEECH_SERVICE"
+        tools:ignore="ProtectedPermissions"/>
+
+    <!-- Khai báo TTS service -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE"/>
+        </intent>
+    </queries>
 
     <application
         android:allowBackup="true"

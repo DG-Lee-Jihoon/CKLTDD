@@ -23,13 +23,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.flashcardapp.data.Deck
 import com.example.flashcardapp.viewmodel.CardViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     viewModel: CardViewModel,
     onDeckClick: (Long) -> Unit,
-    onSettingsClick: () -> Unit
+    onSettingsClick: () -> Unit,
+    onLogout: () -> Unit
 ) {
     val decks by viewModel.allDecks.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
@@ -55,23 +57,22 @@ fun HomeScreen(
         ) {
             item {
                 HomeHeader(
-                    deckCount = decks.size,
-                    onSettingsClick = onSettingsClick
+                    deckCount       = decks.size,
+                    onSettingsClick = onSettingsClick,
+                    onLogout        = onLogout
                 )
             }
 
             if (decks.isEmpty()) {
-                item {
-                    EmptyState()
-                }
+                item { EmptyState() }
             }
 
             items(decks, key = { it.id }) { deck ->
                 DeckItem(
-                    deck = deck,
+                    deck      = deck,
                     viewModel = viewModel,
-                    onClick = { onDeckClick(deck.id) },
-                    onDelete = { viewModel.deleteDeck(deck) }
+                    onClick   = { onDeckClick(deck.id) },
+                    onDelete  = { viewModel.deleteDeck(deck) }
                 )
             }
         }
@@ -91,8 +92,12 @@ fun HomeScreen(
 @Composable
 fun HomeHeader(
     deckCount: Int,
-    onSettingsClick: () -> Unit
+    onSettingsClick: () -> Unit,
+    onLogout: () -> Unit
 ) {
+    val currentUser = FirebaseAuth.getInstance().currentUser
+    val email = currentUser?.email ?: ""
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -106,18 +111,35 @@ fun HomeHeader(
             )
             .padding(horizontal = 24.dp, vertical = 28.dp)
     ) {
-        IconButton(
-            onClick = onSettingsClick,
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .clip(RoundedCornerShape(12.dp))
-                .background(Color.White.copy(alpha = 0.2f))
+        // Nút Settings + Logout góc trên phải
+        Row(
+            modifier = Modifier.align(Alignment.TopEnd),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Icon(
-                Icons.Outlined.Settings,
-                contentDescription = "Cài đặt",
-                tint = Color.White
-            )
+            IconButton(
+                onClick = onLogout,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color.White.copy(alpha = 0.2f))
+            ) {
+                Icon(
+                    Icons.Default.Logout,
+                    contentDescription = "Đăng xuất",
+                    tint = Color.White
+                )
+            }
+            IconButton(
+                onClick = onSettingsClick,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color.White.copy(alpha = 0.2f))
+            ) {
+                Icon(
+                    Icons.Outlined.Settings,
+                    contentDescription = "Cài đặt",
+                    tint = Color.White
+                )
+            }
         }
 
         Column {
@@ -133,11 +155,20 @@ fun HomeHeader(
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.85f)
             )
+            // Hiện email đang đăng nhập
+            if (email.isNotBlank()) {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = email,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
+                )
+            }
             Spacer(Modifier.height(20.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 StatPill(
                     label = "$deckCount bộ thẻ",
-                    icon = Icons.Outlined.LibraryBooks
+                    icon  = Icons.Outlined.LibraryBooks
                 )
             }
         }
@@ -207,7 +238,7 @@ fun DeckItem(
     onDelete: () -> Unit
 ) {
     val totalCount by viewModel.getCardCount(deck.id).collectAsState(initial = 0)
-    val dueCount by viewModel.getDueCardCount(deck.id).collectAsState(initial = 0)
+    val dueCount   by viewModel.getDueCardCount(deck.id).collectAsState(initial = 0)
 
     Card(
         onClick = onClick,
@@ -242,7 +273,11 @@ fun DeckItem(
             Spacer(Modifier.width(14.dp))
 
             Column(modifier = Modifier.weight(1f)) {
-                Text(deck.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(
+                    deck.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
                 if (deck.description.isNotBlank()) {
                     Spacer(Modifier.height(2.dp))
                     Text(
@@ -255,19 +290,19 @@ fun DeckItem(
                 Spacer(Modifier.height(8.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     MiniChip(
-                        text = "$totalCount thẻ",
+                        text  = "$totalCount thẻ",
                         color = MaterialTheme.colorScheme.primaryContainer
                     )
                     if (dueCount > 0) {
                         MiniChip(
-                            text = "$dueCount cần ôn",
-                            color = ColorForgot.copy(alpha = 0.15f),
+                            text      = "$dueCount cần ôn",
+                            color     = ColorForgot.copy(alpha = 0.15f),
                             textColor = ColorForgot
                         )
                     } else {
                         MiniChip(
-                            text = "Đã ôn xong",
-                            color = ColorGood.copy(alpha = 0.15f),
+                            text      = "Đã ôn xong",
+                            color     = ColorGood.copy(alpha = 0.15f),
                             textColor = ColorGood
                         )
                     }
@@ -297,7 +332,12 @@ fun MiniChip(
             .background(color)
             .padding(horizontal = 10.dp, vertical = 4.dp)
     ) {
-        Text(text, style = MaterialTheme.typography.labelMedium, color = textColor, fontWeight = FontWeight.Medium)
+        Text(
+            text,
+            style = MaterialTheme.typography.labelMedium,
+            color = textColor,
+            fontWeight = FontWeight.Medium
+        )
     }
 }
 
@@ -312,9 +352,7 @@ fun AddDeckDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         shape = RoundedCornerShape(24.dp),
-        title = {
-            Text("Tạo bộ thẻ mới", fontWeight = FontWeight.Bold)
-        },
+        title = { Text("Tạo bộ thẻ mới", fontWeight = FontWeight.Bold) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
@@ -340,14 +378,10 @@ fun AddDeckDialog(
                 onClick = { if (name.isNotBlank()) onConfirm(name.trim(), desc.trim()) },
                 enabled = name.isNotBlank(),
                 shape = RoundedCornerShape(12.dp)
-            ) {
-                Text("Tạo")
-            }
+            ) { Text("Tạo") }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Huỷ")
-            }
+            TextButton(onClick = onDismiss) { Text("Huỷ") }
         }
     )
 }

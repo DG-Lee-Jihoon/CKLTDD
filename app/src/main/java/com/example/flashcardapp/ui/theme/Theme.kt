@@ -45,7 +45,7 @@ private val DarkColorScheme = darkColorScheme(
 
 @Composable
 fun FlashcardAppTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = true,
     content: @Composable () -> Unit
 ) {
     val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
