@@ -7,6 +7,7 @@ import com.example.flashcardapp.data.*
 import com.example.flashcardapp.ui.theme.ReviewQuality
 import com.example.flashcardapp.util.FirebaseSync
 import com.example.flashcardapp.util.Sm2Algorithm
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -27,10 +28,14 @@ class CardViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun syncFromCloud() {
         FirebaseSync.listenDecks { deck ->
-            viewModelScope.launch { repository.insertDeck(deck) }
+            viewModelScope.launch(Dispatchers.IO) {   // ← thêm Dispatchers.IO
+                repository.insertDeck(deck)
+            }
         }
         FirebaseSync.listenCards { card ->
-            viewModelScope.launch { repository.insertCard(card) }
+            viewModelScope.launch(Dispatchers.IO) {   // ← thêm Dispatchers.IO
+                repository.insertCard(card)
+            }
         }
     }
 
