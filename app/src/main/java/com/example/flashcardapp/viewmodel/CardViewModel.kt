@@ -1,24 +1,26 @@
 package com.example.flashcardapp.viewmodel
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.*
 import com.example.flashcardapp.data.*
 import com.example.flashcardapp.util.applySmTwo
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ListenerRegistration
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class CardViewModel(application: Application) : AndroidViewModel(application) {
 
+    companion object {
+        private const val TAG = "CardViewModel"
+    }
+
     private val repo   = CardRepository(AppDatabase.getInstance(application).cardDao())
-    private val fsRepo = FirestoreRepository()
+    private val rtRepo = RealtimeRepository()
     private val dao    = AppDatabase.getInstance(application).cardDao()
 
-    private var deckListener: ListenerRegistration? = null
-    private var cardListener: ListenerRegistration? = null
+    // ── Trạng thái đồng bộ ────────────────────────────
+    private val _syncStatus = MutableStateFlow<SyncStatus>(SyncStatus.Idle)
+    val syncStatus: StateFlow<SyncStatus> = _syncStatus.asStateFlow()
 
     // ── Decks ─────────────────────────────────────────
     val allDecks: StateFlow<List<Deck>> = repo.allDecks
@@ -26,16 +28,28 @@ class CardViewModel(application: Application) : AndroidViewModel(application) {
 
     fun addDeck(name: String, description: String = "") {
         viewModelScope.launch {
-            val id = repo.insertDeck(Deck(name = name, description = description))
-            val deck = dao.getDeckById(id)
-            deck?.let { fsRepo.syncDeckToCloud(it) }
+            try {
+                val id   = repo.insertDeck(Deck(name = name, description = description))
+                val deck = dao.getDeckById(id)
+                deck?.let {
+                    rtRepo.syncDeckToCloud(it)
+                    Log.d(TAG, "addDeck: đã sync deck '${it.name}' lên cloud")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "addDeck thất bại: ${e.message}")
+            }
         }
     }
 
     fun deleteDeck(deck: Deck) {
         viewModelScope.launch {
-            repo.deleteDeck(deck)
-            fsRepo.deleteDeckFromCloud(deck.id)
+            try {
+                repo.deleteDeck(deck)
+                rtRepo.deleteDeckFromCloud(deck.id)
+                Log.d(TAG, "deleteDeck: đã xóa deck ${deck.id} khỏi cloud")
+            } catch (e: Exception) {
+                Log.e(TAG, "deleteDeck thất bại: ${e.message}")
+            }
         }
     }
 
@@ -47,97 +61,77 @@ class CardViewModel(application: Application) : AndroidViewModel(application) {
 
     fun addCard(deckId: Long, front: String, back: String) {
         viewModelScope.launch {
-            val card = Card(deckId = deckId, front = front, back = back)
-            repo.insertCard(card)
-            val cards = dao.getDueCards(deckId, Long.MAX_VALUE)
-            cards.find { it.front == front && it.back == back }
-                ?.let { fsRepo.syncCardToCloud(it) }
+            try {
+                val card = Card(deckId = deckId, front = front, back = back)
+                repo.insertCard(card)
+                // ✅ FIX: Lấy card vừa insert bằng cách tìm theo front+back+deckId
+                val inserted = dao.getAllCardsOnce()
+                    .filter { it.deckId == deckId && it.front == front && it.back == back }
+                    .maxByOrNull { it.id }
+                inserted?.let {
+                    rtRepo.syncCardToCloud(it)
+                    Log.d(TAG, "addCard: đã sync card '${it.front}' lên cloud (id=${it.id})")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "addCard thất bại: ${e.message}")
+            }
         }
     }
 
     fun updateCard(card: Card) {
         viewModelScope.launch {
-            repo.updateCard(card)
-            fsRepo.syncCardToCloud(card)
+            try {
+                repo.updateCard(card)
+                rtRepo.syncCardToCloud(card)
+            } catch (e: Exception) {
+                Log.e(TAG, "updateCard thất bại: ${e.message}")
+            }
         }
     }
 
     fun deleteCard(card: Card) {
         viewModelScope.launch {
-            repo.deleteCard(card)
-            fsRepo.deleteCardFromCloud(card.id)
+            try {
+                repo.deleteCard(card)
+                rtRepo.deleteCardFromCloud(card.id)
+            } catch (e: Exception) {
+                Log.e(TAG, "deleteCard thất bại: ${e.message}")
+            }
         }
     }
 
     // ── Đồng bộ từ cloud về máy ───────────────────────
     fun pullFromCloud() {
         viewModelScope.launch {
+            _syncStatus.value = SyncStatus.Syncing
             try {
-                fsRepo.pullAllData(dao)
+                rtRepo.pullAllData(dao)
+                _syncStatus.value = SyncStatus.Success
+                Log.d(TAG, "pullFromCloud: thành công")
             } catch (e: Exception) {
-                e.printStackTrace()
+                _syncStatus.value = SyncStatus.Error(e.message ?: "Lỗi không xác định")
+                Log.e(TAG, "pullFromCloud thất bại: ${e.message}")
             }
         }
     }
 
-    // ── Lắng nghe realtime từ Firestore ───────────────
-    fun observeCloudData() {
-        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        val db     = FirebaseFirestore.getInstance()
-
-        // Hủy listener cũ nếu có
-        deckListener?.remove()
-        cardListener?.remove()
-
-        // Lắng nghe deck realtime
-        deckListener = db.collection("users")
-            .document(userId)
-            .collection("decks")
-            .addSnapshotListener { snapshot, error ->
-                if (error != null || snapshot == null) return@addSnapshotListener
-                snapshot.documentChanges.forEach { change ->
-                    when (change.type) {
-                        com.google.firebase.firestore.DocumentChange.Type.ADDED,
-                        com.google.firebase.firestore.DocumentChange.Type.MODIFIED -> {
-                            val deck = change.document.toDeck() ?: return@forEach
-                            viewModelScope.launch(Dispatchers.IO) {
-                                dao.insertDeck(deck)
-                            }
-                        }
-                        com.google.firebase.firestore.DocumentChange.Type.REMOVED -> {
-                            val deck = change.document.toDeck() ?: return@forEach
-                            viewModelScope.launch(Dispatchers.IO) {
-                                dao.deleteDeck(deck)
-                            }
-                        }
-                    }
-                }
+    // ✅ FIX MỚI: Đẩy toàn bộ dữ liệu local lên cloud
+    // Dùng khi muốn "backup" dữ liệu hiện có lên Firebase
+    fun pushAllToCloud() {
+        viewModelScope.launch {
+            _syncStatus.value = SyncStatus.Syncing
+            try {
+                val decks = dao.getAllDecksOnce()
+                val cards = dao.getAllCardsOnce()
+                decks.forEach { rtRepo.syncDeckToCloud(it) }
+                cards.forEach { rtRepo.syncCardToCloud(it) }
+                _syncStatus.value = SyncStatus.Success
+                Log.d(TAG, "pushAllToCloud: xong - ${decks.size} deck, ${cards.size} card")
+            } catch (e: Exception) {
+                _syncStatus.value = SyncStatus.Error(e.message ?: "Lỗi không xác định")
+                Log.e(TAG, "pushAllToCloud thất bại: ${e.message}")
             }
-
-        // Lắng nghe card realtime
-        cardListener = db.collection("users")
-            .document(userId)
-            .collection("cards")
-            .addSnapshotListener { snapshot, error ->
-                if (error != null || snapshot == null) return@addSnapshotListener
-                snapshot.documentChanges.forEach { change ->
-                    when (change.type) {
-                        com.google.firebase.firestore.DocumentChange.Type.ADDED,
-                        com.google.firebase.firestore.DocumentChange.Type.MODIFIED -> {
-                            val card = change.document.toCard() ?: return@forEach
-                            viewModelScope.launch(Dispatchers.IO) {
-                                dao.insertCard(card)
-                            }
-                        }
-                        com.google.firebase.firestore.DocumentChange.Type.REMOVED -> {
-                            val card = change.document.toCard() ?: return@forEach
-                            viewModelScope.launch(Dispatchers.IO) {
-                                dao.deleteCard(card)
-                            }
-                        }
-                    }
-                }
-            }
+        }
     }
 
     // ── Study session ─────────────────────────────────
@@ -168,7 +162,7 @@ class CardViewModel(application: Application) : AndroidViewModel(application) {
             val card    = currentCard.value ?: return@launch
             val updated = applySmTwo(card, quality)
             repo.updateCard(updated)
-            fsRepo.syncCardToCloud(updated)
+            rtRepo.syncCardToCloud(updated)
 
             if (quality < 3) {
                 val currentList = _dueCards.value.toMutableList()
@@ -193,13 +187,14 @@ class CardViewModel(application: Application) : AndroidViewModel(application) {
         _dueCards.value      = emptyList()
         _currentIndex.value  = 0
     }
+}
 
-    // ── Hủy listener khi ViewModel bị destroy ─────────
-    override fun onCleared() {
-        super.onCleared()
-        deckListener?.remove()
-        cardListener?.remove()
-    }
+// ── Trạng thái đồng bộ ───────────────────────────────
+sealed class SyncStatus {
+    object Idle    : SyncStatus()
+    object Syncing : SyncStatus()
+    object Success : SyncStatus()
+    data class Error(val message: String) : SyncStatus()
 }
 
 class CardViewModelFactory(

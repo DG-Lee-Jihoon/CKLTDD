@@ -91,9 +91,7 @@ fun NavGraph(
         }
 
         composable("settings") {
-            SettingsScreen(
-                onBack = { navController.popBackStack() }
-            )
+            SettingsScreen(onBack = { navController.popBackStack() })
         }
 
         composable("stats/{deckId}") { backStack ->

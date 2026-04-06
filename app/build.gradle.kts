@@ -4,7 +4,6 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     id("com.google.devtools.ksp")
     id("com.google.gms.google-services")
-
 }
 
 android {
@@ -43,7 +42,6 @@ android {
     buildFeatures {
         compose = true
     }
-
 }
 
 dependencies {
@@ -52,13 +50,10 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
 
-    // Dùng string trực tiếp thay vì libs alias để tránh lỗi
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
-
-    // Thêm mới
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.navigation:navigation-compose:2.8.4")
     implementation("androidx.room:room-runtime:2.6.1")
@@ -78,8 +73,8 @@ dependencies {
 
     // Firebase BOM
     implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
-    // Firestore để lưu dữ liệu
-    implementation("com.google.firebase:firebase-firestore-ktx")
-    // Authentication để phân biệt người dùng
+    // Realtime Database thay vì Firestore
+    implementation("com.google.firebase:firebase-database-ktx")
+    // Authentication
     implementation("com.google.firebase:firebase-auth-ktx")
 }

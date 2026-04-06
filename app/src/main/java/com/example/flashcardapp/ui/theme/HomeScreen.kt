@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.flashcardapp.data.Deck
 import com.example.flashcardapp.viewmodel.CardViewModel
+import com.example.flashcardapp.viewmodel.SyncStatus
 import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,7 +34,8 @@ fun HomeScreen(
     onSettingsClick: () -> Unit,
     onLogout: () -> Unit
 ) {
-    val decks by viewModel.allDecks.collectAsState()
+    val decks      by viewModel.allDecks.collectAsState()
+    val syncStatus by viewModel.syncStatus.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -58,9 +60,72 @@ fun HomeScreen(
             item {
                 HomeHeader(
                     deckCount       = decks.size,
+                    syncStatus      = syncStatus,
                     onSettingsClick = onSettingsClick,
-                    onLogout        = onLogout
+                    onLogout        = onLogout,
+                    onSync          = { viewModel.pullFromCloud() },
+                    onPush          = { viewModel.pushAllToCloud() }
                 )
+            }
+
+            // ✅ Hiển thị trạng thái đồng bộ
+            item {
+                AnimatedVisibility(
+                    visible = syncStatus is SyncStatus.Syncing || syncStatus is SyncStatus.Error,
+                    enter = slideInVertically() + fadeIn(),
+                    exit = slideOutVertically() + fadeOut()
+                ) {
+                    when (syncStatus) {
+                        is SyncStatus.Syncing -> {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 4.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(MaterialTheme.colorScheme.primaryContainer)
+                                    .padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(16.dp),
+                                    strokeWidth = 2.dp,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Text(
+                                    "Đang đồng bộ...",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+                        is SyncStatus.Error -> {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 4.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(MaterialTheme.colorScheme.errorContainer)
+                                    .padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                Icon(
+                                    Icons.Default.ErrorOutline,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Text(
+                                    "Đồng bộ thất bại: ${(syncStatus as SyncStatus.Error).message}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        }
+                        else -> {}
+                    }
+                }
             }
 
             if (decks.isEmpty()) {
@@ -92,11 +157,15 @@ fun HomeScreen(
 @Composable
 fun HomeHeader(
     deckCount: Int,
+    syncStatus: SyncStatus,
     onSettingsClick: () -> Unit,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    onSync: () -> Unit,
+    onPush: () -> Unit
 ) {
     val currentUser = FirebaseAuth.getInstance().currentUser
     val email = currentUser?.email ?: ""
+    val isSyncing = syncStatus is SyncStatus.Syncing
 
     Box(
         modifier = Modifier
@@ -111,11 +180,39 @@ fun HomeHeader(
             )
             .padding(horizontal = 24.dp, vertical = 28.dp)
     ) {
-        // Nút Settings + Logout góc trên phải
+        // Nút góc trên phải
         Row(
             modifier = Modifier.align(Alignment.TopEnd),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            // ✅ Nút đẩy dữ liệu local lên cloud
+            IconButton(
+                onClick = onPush,
+                enabled = !isSyncing,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color.White.copy(alpha = 0.2f))
+            ) {
+                Icon(
+                    Icons.Default.CloudUpload,
+                    contentDescription = "Đẩy lên cloud",
+                    tint = Color.White
+                )
+            }
+            // ✅ Nút kéo dữ liệu từ cloud về
+            IconButton(
+                onClick = onSync,
+                enabled = !isSyncing,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color.White.copy(alpha = 0.2f))
+            ) {
+                Icon(
+                    Icons.Default.CloudDownload,
+                    contentDescription = "Kéo từ cloud",
+                    tint = Color.White
+                )
+            }
             IconButton(
                 onClick = onLogout,
                 modifier = Modifier
@@ -155,7 +252,6 @@ fun HomeHeader(
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.85f)
             )
-            // Hiện email đang đăng nhập
             if (email.isNotBlank()) {
                 Spacer(Modifier.height(4.dp))
                 Text(
@@ -170,6 +266,18 @@ fun HomeHeader(
                     label = "$deckCount bộ thẻ",
                     icon  = Icons.Outlined.LibraryBooks
                 )
+                // ✅ Hiển thị trạng thái sync trong pill
+                when (syncStatus) {
+                    is SyncStatus.Success -> StatPill(
+                        label = "Đã đồng bộ",
+                        icon  = Icons.Default.CloudDone
+                    )
+                    is SyncStatus.Syncing -> StatPill(
+                        label = "Đang sync...",
+                        icon  = Icons.Default.Sync
+                    )
+                    else -> {}
+                }
             }
         }
     }

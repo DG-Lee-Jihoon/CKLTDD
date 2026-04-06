@@ -16,6 +16,10 @@ interface CardDao {
     @Query("SELECT * FROM decks ORDER BY createdAt DESC")
     fun getAllDecks(): Flow<List<Deck>>
 
+    // ✅ FIX: Thêm hàm suspend để lấy tất cả deck 1 lần (dùng khi push lên cloud)
+    @Query("SELECT * FROM decks ORDER BY createdAt DESC")
+    suspend fun getAllDecksOnce(): List<Deck>
+
     @Query("SELECT * FROM decks WHERE id = :id")
     suspend fun getDeckById(id: Long): Deck?
 
@@ -43,4 +47,8 @@ interface CardDao {
 
     @Query("SELECT COUNT(*) FROM cards WHERE nextReviewDate <= :now")
     suspend fun getAllDueCardsCount(now: Long): Int
+
+    // ✅ FIX: Thêm hàm lấy tất cả card 1 lần (dùng khi push lên cloud)
+    @Query("SELECT * FROM cards ORDER BY createdAt DESC")
+    suspend fun getAllCardsOnce(): List<Card>
 }

@@ -42,7 +42,6 @@ fun AuthScreen(
     LaunchedEffect(Unit) {
         if (auth.currentUser != null) {
             viewModel.pullFromCloud()
-            viewModel.observeCloudData()
             onAuthSuccess()
         }
     }
@@ -125,12 +124,10 @@ fun AuthScreen(
                         colors = ButtonDefaults.buttonColors(
                             containerColor = if (isLoginMode == isLogin)
                                 MaterialTheme.colorScheme.primary
-                            else
-                                Color.Transparent,
+                            else Color.Transparent,
                             contentColor = if (isLoginMode == isLogin)
                                 Color.White
-                            else
-                                MaterialTheme.colorScheme.onSurfaceVariant
+                            else MaterialTheme.colorScheme.onSurfaceVariant
                         ),
                         elevation = ButtonDefaults.buttonElevation(0.dp),
                         shape = RoundedCornerShape(12.dp)
@@ -145,9 +142,7 @@ fun AuthScreen(
                 value = email,
                 onValueChange = { email = it; errorMessage = "" },
                 label = { Text("Email") },
-                leadingIcon = {
-                    Icon(Icons.Default.Email, contentDescription = null)
-                },
+                leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp),
@@ -162,9 +157,7 @@ fun AuthScreen(
                 value = password,
                 onValueChange = { password = it; errorMessage = "" },
                 label = { Text("Mật khẩu") },
-                leadingIcon = {
-                    Icon(Icons.Default.Lock, contentDescription = null)
-                },
+                leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
                 trailingIcon = {
                     IconButton(onClick = { showPassword = !showPassword }) {
                         Icon(
@@ -176,8 +169,7 @@ fun AuthScreen(
                 },
                 visualTransformation = if (showPassword)
                     VisualTransformation.None
-                else
-                    PasswordVisualTransformation(),
+                else PasswordVisualTransformation(),
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp),
@@ -187,15 +179,13 @@ fun AuthScreen(
                 )
             )
 
-            // Xác nhận mật khẩu (chỉ hiện khi đăng ký)
+            // Xác nhận mật khẩu
             if (!isLoginMode) {
                 OutlinedTextField(
                     value = confirmPass,
                     onValueChange = { confirmPass = it; errorMessage = "" },
                     label = { Text("Xác nhận mật khẩu") },
-                    leadingIcon = {
-                        Icon(Icons.Default.LockOpen, contentDescription = null)
-                    },
+                    leadingIcon = { Icon(Icons.Default.LockOpen, contentDescription = null) },
                     visualTransformation = PasswordVisualTransformation(),
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
@@ -264,7 +254,6 @@ fun AuthScreen(
                             .addOnSuccessListener {
                                 isLoading = false
                                 viewModel.pullFromCloud()
-                                viewModel.observeCloudData()
                                 onAuthSuccess()
                             }
                             .addOnFailureListener { e ->
@@ -284,7 +273,6 @@ fun AuthScreen(
                         auth.createUserWithEmailAndPassword(email.trim(), password)
                             .addOnSuccessListener {
                                 isLoading = false
-                                viewModel.observeCloudData()
                                 onAuthSuccess()
                             }
                             .addOnFailureListener { e ->
@@ -313,8 +301,7 @@ fun AuthScreen(
                     )
                 } else {
                     Icon(
-                        if (isLoginMode) Icons.Default.Login
-                        else Icons.Default.PersonAdd,
+                        if (isLoginMode) Icons.Default.Login else Icons.Default.PersonAdd,
                         contentDescription = null,
                         modifier = Modifier.size(20.dp)
                     )
